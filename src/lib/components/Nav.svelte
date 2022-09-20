@@ -1,30 +1,41 @@
 <script>
-    // @ts-nocheck
+// @ts-nocheck
 
+	import { onMount } from 'svelte';
     import { THEME } from '../stores';
 
+    /**
+	 * @type {number}
+	 */
     let currentTheme;
 
     THEME.subscribe(value => {
         currentTheme = value;
     })
+
+    onMount(() => {
+        setTheme(currentTheme);
+    })
     
     /**
 * @param {any} _theme
 */
-    function changeTheme(_theme) {
-        document.getElementById('transition-screen').style.zIndex = 5;
-        document.getElementById('transition-screen').style.transition = "1s ease-in";
+    function setTheme(_theme) { 
+        // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 1;
         setTimeout(() => {
             THEME.set(_theme);
-            console.log(_theme);
+            if(_theme == 0) {
+                document.getElementById('crimson-music').pause();
+                document.getElementById('gold-music').play();
+            }
+            else {
+                document.getElementById('gold-music').pause();
+                document.getElementById('crimson-music').play();
+            }
+            // @ts-ignore
             document.getElementById('transition-screen').style.opacity = 0;
-            setTimeout(() => {
-                document.getElementById('transition-screen').style.transition = "none";
-                document.getElementById('transition-screen').style.zIndex = -2;
-            }, 1000)
-        }, 2000);
+        }, 1500);
     }  
 
 </script>
@@ -37,11 +48,11 @@
         </h1>
         <section>
             <div class="theme" class:active={currentTheme == 0}>
-                <div on:click={() => {changeTheme(0)}} id="gold"></div>
+                <div on:click={() => {setTheme(0)}} id="gold"></div>
             </div>
             <div class="line"></div>
             <div class="theme" class:active={currentTheme == 1}>
-                <div on:click={() => {changeTheme(1)}} id="crimson"></div>
+                <div on:click={() => {setTheme(1)}} id="crimson"></div>
             </div>
         </section>
     </nav>
@@ -57,11 +68,11 @@
         justify-content: space-between;
         align-items: center;
         padding-top: 1rem;
-        font-size: 2.6rem;
         margin-left: 18%;
         margin-right: 18%;
 
         h1 {
+            font-size: 2.6rem;
             color: white;
             font-weight: normal;
             font-family: 'Seagram',sans-serif;

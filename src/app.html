@@ -8,6 +8,8 @@
 		%sveltekit.head%
 	</head>
 	<body>
+		<audio id="gold-music" onloadstart="this.volume = 0.025;" src="/audios/overlord-0.mp3" loop></audio> 
+		<audio id="crimson-music" onloadstart="this.volume = 0.025;" src="/audios/overlord-1.mp3" loop></audio>
 		<div id="transition-screen">
 			<img src="/images/logo.png" alt="">
 		</div>
@@ -52,7 +54,9 @@
 			position: fixed;
 			display: grid;
 			place-items: center;
-			z-index: 2;
+			transition: 1.5s ease-in-out;
+			z-index: 3;
+			pointer-events: none;
 		}
 		#transition-screen img {
             width: 100px;

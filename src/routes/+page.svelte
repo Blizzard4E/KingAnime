@@ -6,32 +6,16 @@
     onMount(() => {
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 0;
-        // @ts-ignore
-        document.getElementById('transition-screen').style.transition = "1s ease-in";
-        setTimeout(() => {
-            // @ts-ignore
-            document.getElementById('transition-screen').style.transition = "none";
-            // @ts-ignore
-            document.getElementById('transition-screen').style.zIndex = -2;
-        }, 1000)
     })
     /**
     * @param {string} path
     */
     function transitionStart(path) {
         // @ts-ignore
-        document.getElementById('transition-screen').style.zIndex = 5;
-        // @ts-ignore
-        document.getElementById('transition-screen').style.transition = "1s ease-in";
-        // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 1;
-        setTimeout(sendToPath, 1000, path);
-    }
-    /**
-    * @param {string | URL} path
-    */
-    function sendToPath(path) {
-        goto(path);
+        setTimeout(() => {
+            goto(path);
+        }, 1500);
     }
 
 </script>

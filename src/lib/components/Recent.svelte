@@ -116,7 +116,7 @@
     $item-width: 170px;
     main {
         width: 100vw;
-        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.8));
+        background: linear-gradient(rgba(36, 36, 36, 0.1),rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.8));
     }
     .grid {
         width: 1400px;

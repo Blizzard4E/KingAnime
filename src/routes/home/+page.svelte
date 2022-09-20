@@ -8,21 +8,17 @@
     import { onMount } from 'svelte';
 
     onMount(() => {
-
-        setTimeout(() => {
-            document.getElementById('transition-screen').style.transition = "1s ease-in";
-            document.getElementById('transition-screen').style.opacity = 0;
-            setTimeout(() => {
-                document.getElementById('transition-screen').style.transition = "0s";
-                document.getElementById('transition-screen').style.zIndex = -2;
-            }, 1000);
-        }, 1000);
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 0;
+        console.log("Opacity 0")
     });
 </script>
 
 <main>
-    <BgVideo/>
-    <Nav/>
+    <nav>
+        <BgVideo/>
+        <Nav/>
+    </nav>
     <div class="grid">
         <Popular/>
         <Recent/>
@@ -30,5 +26,13 @@
 </main>
 
 <style lang="scss" scoped> 
-    
+    main {
+        scroll-snap-type: y mandatory;
+    }
+    nav {
+        margin-bottom: 35vh;
+    }
+    .grid {
+        scroll-snap-align: start;
+    }
 </style>

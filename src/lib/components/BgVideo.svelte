@@ -6,7 +6,6 @@
 	 * @type {number}
 	 */
     let currentTheme;
-    let volume = 0.025;
 
     THEME.subscribe(value => {
         currentTheme = value;  
@@ -14,13 +13,9 @@
 </script>
 
 {#if currentTheme == 0}
-    <video src="/videos/overlord-0.mp4" autoplay loop muted></video>   
-    <!-- @ts-ignore -->
-     <audio onloadstart="this.volume = {volume}" src="/audios/overlord-0.mp3" autoplay loop></audio> 
+    <video src="/videos/overlord-0.mp4" autoplay loop muted></video>
 {:else}
-    <video src="/videos/overlord-1.mp4" autoplay loop muted></video> 
-    <!-- @ts-ignore -->
-    <audio onloadstart="this.volume = {volume}" volume={volume} src="/audios/overlord-1.mp3" autoplay loop></audio>
+    <video src="/videos/overlord-1.mp4" autoplay loop muted></video>
 {/if} 
 <div class="bg"></div>
 

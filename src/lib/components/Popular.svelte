@@ -33,7 +33,7 @@
     function moveSlide(i) {
         let pos = i + 1;
         // @ts-ignore
-        document.getElementById("carousel").style.transform = "translateX(-" + pos + "00%)";
+        document.getElementById("carousel").style.transform = "translateX(-" + pos + "00%) perspective(1px)";
     }
     async function fetchPopular() {
         console.log("Fetching Popular Animes");
@@ -48,7 +48,6 @@
     <!-- svelte-ignore empty-block -->
     {#await fetchPopular()}
     {:then popular_animes}
-    <h1><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>T</span>rending</h1>
     <div class="next-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => nextSlide()}>
         <span class="material-symbols-outlined">
         arrow_forward_ios
@@ -149,39 +148,13 @@
 
 <style lang="scss">
     main {
-        margin-top: 35vh;
         width: 100vw;
-        height: 50vh;
+        height: 45vh;
         overflow: hidden;
-        background:rgba(36, 36, 36, 0.1);
         display: grid;
         place-items: center;
         position: relative;
-    }
-    h1 {
-        z-index: 1;
-        position: absolute;
-        left: 0;
-        user-select: none;
-        font-family: 'Fandango Bold', sans-serif;
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        color: white;
-        font-weight: normal;
-        filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
-        span {
-            font-family: 'Seagram', sans-serif;
-        }
-        .gold {
-            background: linear-gradient($goldDark, $goldDark, $goldBright, $goldDark, $goldDark);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .crimson {
-            background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0.1), rgba(36, 36, 36, 0.1));
     }
     #carousel {
         width: 30vw;
@@ -313,7 +286,7 @@
         }
     }
     .slide.active {
-        transform: scale(1.4);
+        transform: scale(1.4) perspective(1px);
         filter: brightness(1);
         margin: 5vh 5vw;
         opacity: 1;
