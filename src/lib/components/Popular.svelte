@@ -61,7 +61,7 @@
     <div id="carousel" class:back-light={currentTheme == 1}>
         {#if popular_animes[popular_animes.length - 1].bannerImage == null}
             <div class="slide" style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].coverImage + "')" +
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].coverImage + "');" +
                 "background-size: cover;" + 
                 "background-position: center;"            
                 }>

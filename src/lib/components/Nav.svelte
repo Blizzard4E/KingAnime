@@ -90,7 +90,7 @@
 
             span {
                 &:nth-child(2) {
-                    margin-left: -0.9rem;
+                    margin-left: -0.5rem;
                 }
             }
         }
