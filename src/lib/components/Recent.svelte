@@ -1,4 +1,5 @@
 <script>
+	import { goto } from '$app/navigation';
 	import { THEME } from '$lib/stores'; 
     /**
 	 * @type {number}
@@ -64,6 +65,16 @@
         const animes = fixData(await result.data);
         return animes;
     }
+    /**
+	 * @param {string | URL} path
+	 */
+     function transitionStart(path) {
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 1;
+        setTimeout(() => {
+            goto(path);
+        }, 1500);
+    }
 </script>
 
 <main>
@@ -75,13 +86,13 @@
         <ul>
             {#each animes as anime}
                 <li class:back-light={currentTheme == 1}>
-                    <a href="{"/"+ anime.anime.slug}" class="row-1">
-                        <div class="col-1">
+                    <div class="row-1">
+                        <div on:click={() => transitionStart("/anime/"+ anime.anime.slug)} class="col-1">
                             <img src="{anime.anime.coverImage}" alt="">
                         </div>
                         <div class="col-2">
                             <div class="info">
-                                <h2><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
+                                <h2 on:click={() => transitionStart("/anime/"+ anime.anime.slug)}><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
                                 <h4>Genre:
                                     {#each anime.anime.genre as genre}
                                         <!-- svelte-ignore a11y-missing-attribute -->
@@ -91,7 +102,7 @@
                                 <p>{@html anime.anime.description}</p>
                             </div>
                         </div>
-                    </a>
+                    </div>
                     <div class="row-2">
                         <a href="../" class="thumbnail">
                             {#if anime.image != null}
@@ -357,7 +368,8 @@
                     transition: 0.3s ease-out;
                 }
                 h3 {
-                    padding: 0.15rem;
+                    padding: 0.1rem;
+                    padding-bottom: 0.2rem;
                     font-family: 'Quicksand', sans-serif;
                     font-size: 1.2rem;
                     color: white;

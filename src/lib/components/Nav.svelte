@@ -1,4 +1,6 @@
 <script>
+	import { goto } from '$app/navigation';
+
 // @ts-nocheck
 
 	import { onMount } from 'svelte';
@@ -26,23 +28,29 @@
         setTimeout(() => {
             THEME.set(_theme);
             if(_theme == 0) {
+                // @ts-ignore
                 document.getElementById('crimson-music').pause();
+                // @ts-ignore
                 document.getElementById('gold-music').play();
             }
             else {
+                // @ts-ignore
                 document.getElementById('gold-music').pause();
+                // @ts-ignore
                 document.getElementById('crimson-music').play();
             }
             // @ts-ignore
             document.getElementById('transition-screen').style.opacity = 0;
         }, 1500);
     }  
-
+    function goHome() {
+        goto('/home');
+    }
 </script>
 
 <main>  
     <nav>
-        <h1>
+        <h1 on:click={() => goHome()}>
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
         </h1>
@@ -72,6 +80,8 @@
         margin-right: 18%;
 
         h1 {
+            user-select: none;
+            cursor: pointer;
             font-size: 2.6rem;
             color: white;
             font-weight: normal;
@@ -79,11 +89,13 @@
 
             .gold {
                 background: linear-gradient($goldDark, $goldDark, $goldBright, $goldDark, $goldDark);
+                background-clip: text;
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }
             .crimson {
                 background: linear-gradient(rgb(204, 0, 17), rgb(204, 0, 17), rgb(255, 57, 57), rgb(204, 0, 17), rgb(204, 0, 17));
+                background-clip: text;
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }

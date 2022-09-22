@@ -1,6 +1,5 @@
 <script>
-// @ts-nocheck
-
+	import { goto } from '$app/navigation';
 	import { THEME } from '$lib/stores'; 
 
     /**
@@ -8,14 +7,14 @@
 	 */
     let currentTheme;
     let slide = 0;
+    /**
+	 * @type {number}
+	 */
     let slidesAmount;
 
     THEME.subscribe(value => {
         currentTheme = value;
     })
-    function getID(i) {
-        return "slide-" + i;
-    }
     function nextSlide() {
         if(slide + 1 >= slidesAmount) {
             slide = 0;
@@ -30,17 +29,55 @@
         else slide--;
         moveSlide(slide);
     }
+    /**
+	 * @param {number} i
+	 */
     function moveSlide(i) {
         let pos = i + 1;
         // @ts-ignore
         document.getElementById("carousel").style.transform = "translateX(-" + pos + "00%) perspective(1px)";
+    }
+    /**
+	 * @param {{ bannerImage: null; coverImage: any; }} anime
+	 */
+    function fixBanner(anime) {
+        if(anime.bannerImage == null) {
+            return new Promise((resolve) => {
+                resolve(anime.coverImage);
+            })
+        }
+        else {
+            return new Promise((resolve) => {
+                resolve(anime.bannerImage);
+            })
+        }
+    }
+    /**
+	 * @param {any} animes
+	 */
+    async function fixData(animes) {
+        for (const anime of animes) {
+            anime.bannerImage = await fixBanner(anime);
+        }
+        return animes;
     }
     async function fetchPopular() {
         console.log("Fetching Popular Animes");
         const response = await fetch('https://api.enime.moe/popular');
         const result = await response.json(); 
         slidesAmount = result.data.length;
-        return result.data;
+        const animes = fixData(await result.data);
+        return animes;
+    }
+    /**
+	 * @param {string | URL} path
+	 */
+    function transitionStart(path) {
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 1;
+        setTimeout(() => {
+            goto(path);
+        }, 1500);
     }
 </script>
 
@@ -59,89 +96,44 @@
         </span>
     </div>
     <div id="carousel" class:back-light={currentTheme == 1}>
-        {#if popular_animes[popular_animes.length - 1].bannerImage == null}
-            <div class="slide" style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].coverImage + "');" +
-                "background-size: cover;" + 
-                "background-position: center;"            
-                }>
-                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                    {#each popular_animes[popular_animes.length - 1].genre as genre}
-                        <span>{genre}</span>
-                    {/each}
-                </h3>
-                <h2>{popular_animes[popular_animes.length - 1].title.english}</h2>
-            </div>
-        {:else}
-            <div class="slide" style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].bannerImage + "');" +
-                "background-size: cover;" + 
-                "background-position: center;"            
-                }>
-                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                    {#each popular_animes[popular_animes.length - 1].genre as genre}
-                        <span>{genre}</span>
-                    {/each}
-                </h3>
-                <h2>{popular_animes[popular_animes.length - 1].title.english}</h2>
-            </div>
-        {/if}
+        <div class="slide" style={
+            "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].bannerImage + "');" +
+            "background-size: cover;" + 
+            "background-position: center;"            
+            }>
+            <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                {#each popular_animes[popular_animes.length - 1].genre as genre}
+                    <span>{genre}</span>
+                {/each}
+            </h3>
+            <h2>{popular_animes[popular_animes.length - 1].title.english}</h2>
+        </div>
         {#each popular_animes as anime, i}
-        {#if anime.bannerImage == null}
-            <a href={"/" + anime.slug} class="slide" class:active={slide == i} style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.coverImage + "');" +
-                "background-size: cover;" + 
-                "background-position: center;"            
-                }>
-                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                    {#each anime.genre as genre}
-                        <span>{genre}</span>
-                    {/each}
-                </h3>
-                <h2>{anime.title.english}</h2>
-            </a>
-        {:else}
-            <a href={"/" + anime.slug} class="slide" class:active={slide == i} style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.bannerImage + "');" +
-                "background-size: cover;" + 
-                "background-position: center;"            
-                }>
-                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                    {#each anime.genre as genre}
-                        <span>{genre}</span>
-                    {/each}
-                </h3>
-                <h2>{anime.title.english}</h2>
-            </a>
-        {/if}
+        <div on:click={() => transitionStart('/anime/' + anime.slug)} class="slide" class:active={slide == i} style={
+            "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.bannerImage + "');" +
+            "background-size: cover;" + 
+            "background-position: center;"            
+            }>
+            <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                {#each anime.genre as genre}
+                    <span>{genre}</span>
+                {/each}
+            </h3>
+            <h2>{anime.title.english}</h2>
+        </div>
         {/each}
-        {#if popular_animes[0].bannerImage == null}
-            <div class="slide" style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[0].coverImage + "');" +
-                "background-size: cover;" + 
-                "background-position: center;"            
-                }>
-                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                    {#each popular_animes[0].genre as genre}
-                        <span>{genre}</span>
-                    {/each}
-                </h3>
-                <h2>{popular_animes[0].title.english}</h2>
-            </div>
-        {:else}
-            <div class="slide" style={
-                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[0].bannerImage + "');" +
-                "background-size: cover;" + 
-                "background-position: center;"            
-                }>
-                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                    {#each popular_animes[0].genre as genre}
-                        <span>{genre}</span>
-                    {/each}
-                </h3>
-                <h2>{popular_animes[0].title.english}</h2>
-            </div>
-        {/if}
+        <div class="slide" style={
+            "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[0].bannerImage + "');" +
+            "background-size: cover;" + 
+            "background-position: center;"            
+            }>
+            <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                {#each popular_animes[0].genre as genre}
+                    <span>{genre}</span>
+                {/each}
+            </h3>
+            <h2>{popular_animes[0].title.english}</h2>
+        </div>
     </div>
     {/await}
 </main>
@@ -180,6 +172,11 @@
         cursor: pointer;
         user-select: none;
         transition: 0.25s ease-in-out;
+        opacity: 0;
+        animation: fadeIn;
+        animation-duration: 1.25s;
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: forwards;
         
         &:active {
             transform: scale(3);
@@ -196,6 +193,11 @@
         cursor: pointer;
         user-select: none;
         transition: 0.25s ease-in-out;
+        opacity: 0;
+        animation: fadeIn;
+        animation-duration: 1.25s;
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: forwards;
 
         &:active {
             transform: scale(3);
@@ -228,7 +230,11 @@
             filter: drop-shadow(0 0 6px $crimsonDark) brightness(0.6);
         }
         .slide.active {
-            filter: drop-shadow(0 0 10px $crimsonDark);
+            filter: drop-shadow(0 0 8px $crimsonDark);
+
+            &:hover {
+                filter: drop-shadow(0 0 14px $crimsonDark);
+            }
         }
     }
     .slide {
