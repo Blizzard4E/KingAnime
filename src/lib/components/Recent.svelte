@@ -68,7 +68,7 @@
     /**
 	 * @param {string | URL} path
 	 */
-     function transitionStart(path) {
+    function transitionStart(path) {
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 1;
         setTimeout(() => {
@@ -207,7 +207,7 @@
                     margin-top: 0.3rem;
                 }
                 .row-2 .thumbnail h5 {
-                    opacity: 1;
+                    font-size: 2rem;
                 }
             }
 
@@ -313,7 +313,7 @@
                 padding: 0.3rem;
                 transform: translateY(-1px);
                 clip-path: polygon(0% 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
-                transition: 0.25 ease-out;
+                transition: 0.25s ease-out;
                 place-items: center;
 
                 .thumbnail {
@@ -325,7 +325,7 @@
                     &:hover {
                         cursor: pointer;
                         .video-img, h5 {
-                            filter: brightness(0.7);
+                            filter: brightness(0.6);
                         }
                         .play {
                             opacity: 1;
@@ -342,9 +342,8 @@
 
                     h5 {
                         font-family: 'Quicksand', sans-serif;
-                        font-size: 2rem;
+                        font-size: 0;
                         font-weight: normal;
-                        opacity: 0;
                         color: white;
                         transition: 0.3s ease-in-out;
                     }
@@ -362,10 +361,9 @@
                     left: calc(50%);
                     transform: translate(-50%, -50%);
                     opacity: 0;
-                    width: 50px;
-                    height: 50px;
+                    width: 40px;
                     user-select: none;
-                    transition: 0.3s ease-out;
+                    transition: 0.3s ease-in-out;
                 }
                 h3 {
                     padding: 0.1rem;

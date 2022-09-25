@@ -1,4 +1,5 @@
 <script>
+	import { goto } from '$app/navigation';
 	import BgVideo from '$lib/components/BgVideo.svelte';
     import Nav from '$lib/components/Nav.svelte';
     import { THEME } from '$lib/stores'; 
@@ -15,7 +16,7 @@
     onMount(() => {
         setTimeout(() => {
             allowVideoHover = true;
-        }, 2000);
+        }, 2500);
     })
 
     /** @type {import('./$types').PageData} */
@@ -104,6 +105,9 @@
         const result = await response.json();
         let anime = await fixData(await result);
         anime.youtubeID = await getYoutubeLink(anime.mappings.kitsu);
+        anime.episodes.reverse();
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 0;
         return anime;
     }
 
@@ -131,6 +135,16 @@
             thumbnail.style.pointerEvents = 'none';
         }
     }
+    /**
+	 * @param {string | URL} path
+	 */
+    function transitionStart(path) {
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 1;
+        setTimeout(() => {
+            goto(path);
+        }, 1500);
+    }
 </script>
 
 <main>
@@ -147,7 +161,8 @@
                 <div class="col-2">
                     <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
                     <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
-                    <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                    </iframe>
                 </div>
             </div>
         </div>
@@ -162,6 +177,7 @@
                 {/each}
             </h4>
             <p>{@html anime.description}</p>
+            <h4>Episodes:</h4>
             <ul>
                 {#if allowEp > 24}
                     {#each Array(allowEp) as _, i}
@@ -169,8 +185,16 @@
                     {/each}
                 {:else}
                     {#each Array(allowEp) as _, i}
-                        <img src={anime.episodes[i].image} alt="">
-                        {anime.episodes[i].number}
+                        <li>
+                            <div class="content">
+                                <div style="position: relative;width: 100%; overflow: hidden;">
+                                    <img src="/images/play.png" alt="">
+                                    <img src={anime.episodes[i].image} alt="">
+                                </div>
+                                <h5>Epiosode {anime.episodes[i].number}</h5>
+                            </div>
+                            <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                        </li>
                     {/each}
                 {/if}
                 <button on:click={() => {allowMoreEp(anime)}}>Show more</button>
@@ -201,7 +225,6 @@
         font-size: 2.5rem;
         padding-top: 1rem;
         line-height: 1;
-        margin-bottom: 0.5rem;
         color: white;
         font-weight: bold;
 
@@ -222,7 +245,7 @@
         -webkit-line-clamp: 4;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        margin-bottom: 0.5rem;
+        margin: 0.5rem 0;
 
         a {
             transition: 0.15s ease-out;
@@ -258,6 +281,11 @@
         -webkit-line-clamp: 10;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    #yt-player {
+        width: 100%;
+        height: 100%;
     }
     .grid {
         margin-top: 2rem;
@@ -302,12 +330,101 @@
                 transition: 0.3s ease-in-out;
                 filter: brightness(0.6);
             }
-            iframe {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: center;
-                user-select: none;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            user-select: none;
+        }
+    }
+    ul {
+        margin-top: 1rem;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        column-gap: 1.5rem;
+        row-gap: 1.5rem;
+        padding-bottom: 2rem;
+
+        li {
+            position: relative;
+            width: 100%;
+            display: grid;
+            place-items: center;
+
+            &:hover {
+                cursor: pointer;
+                .content {
+                    img {
+                        &:nth-child(1) {
+                            opacity: 1;
+                        }
+                        &:nth-child(2) {
+                            transform: scale(1);
+                            filter: brightness(0.6);
+                        }
+                    }
+                }
+            }
+            .content {
+                clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
+                z-index: 1;
+                display: grid;
+                place-items: center;
+                background-color: rgba(36, 36, 36, 1);background-color: rgba(36, 36, 36, 1);
+
+                img {
+                    display: block;
+                    transition: 0.25s ease-in-out;
+
+                    &:nth-child(1) {
+                        position: absolute;
+                        width: 30px;
+                        z-index: 1;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        opacity: 0;
+                    }
+                    
+                    &:nth-child(2) {
+                        width: 100%;
+                        transform: scale(1.2);
+                    }
+                }
+            }
+            h5 {
+                padding: 0.5rem;
+                width: 80%;
+                font-family: 'Quicksand', sans-serif;
+                font-size: 1rem;
+                font-weight: normal;
+                text-align: center;
+                color: white;
+                transition: 0.3s ease-in-out;
+
+                &:nth-child(3) {
+                    margin-bottom: 0.5rem;
+                }
+            }
+            .bg {
+                background-size: cover;
+                clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: calc(100% + 0.25rem);
+                height:calc(100% + 0.25rem);
+                z-index: 0;
+                transition: 0.3s ease-out;
+            }
+            .bg.gold {
+                background: linear-gradient($goldDark, $goldDark, $goldBright, $goldDark, $goldDark);
+            }
+            .bg.crimson {
+                background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);
             }
         }
     }

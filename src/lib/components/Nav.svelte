@@ -16,7 +16,18 @@
     })
 
     onMount(() => {
-        setTheme(currentTheme);
+        if(currentTheme == 0) {
+            // @ts-ignore
+            document.getElementById('crimson-music').pause();
+            // @ts-ignore
+            document.getElementById('gold-music').play();
+        }
+        else {
+            // @ts-ignore
+            document.getElementById('gold-music').pause();
+            // @ts-ignore
+            document.getElementById('crimson-music').play();
+        }
     })
     
     /**
@@ -43,8 +54,13 @@
             document.getElementById('transition-screen').style.opacity = 0;
         }, 1500);
     }  
+    
     function goHome() {
-        goto('/home');
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 1;
+        setTimeout(() => {
+            goto('/home');
+        }, 1500);
     }
 </script>
 

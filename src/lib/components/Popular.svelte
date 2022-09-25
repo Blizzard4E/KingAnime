@@ -233,7 +233,7 @@
             filter: drop-shadow(0 0 8px $crimsonDark);
 
             &:hover {
-                filter: drop-shadow(0 0 14px $crimsonDark);
+                filter: drop-shadow(0 0 8px $crimsonBright);
             }
         }
     }
@@ -243,7 +243,7 @@
         min-height: 30vh;
         transition: 0.25s ease-in-out;
         filter: brightness(0.45);
-        transform: scale(0.8);
+        transform: scale(0.8) translateZ(0);
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -292,7 +292,7 @@
         }
     }
     .slide.active {
-        transform: scale(1.4) perspective(1px);
+        transform: scale(1.4) perspective(1px) translateZ(0);
         filter: brightness(1);
         margin: 5vh 5vw;
         opacity: 1;
