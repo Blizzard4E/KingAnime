@@ -75,7 +75,7 @@
                     </div>
                     <div>
                         <div style="display: flex;">
-                            <h2>{anime.title}</h2>
+                            <h2 on:click={() => transitionStart("/anime/" + anime.slug)}>{anime.title}</h2>
                         </div>
                         <h4>Genre:
                             {#each anime.genre as genre}
@@ -118,6 +118,7 @@
             line-height: 1;
             color: white;
             font-weight: bold;
+            cursor: pointer;
         }
         h4 {
             line-height: 1.1;
