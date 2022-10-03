@@ -32,7 +32,6 @@
         position: fixed;
         width: 100%;
         height: 100vh;
-        background: linear-gradient(transparent,rgba(36, 36, 36, 0.5), rgba(36, 36, 36, 0.9),rgba(36, 36, 36, 1));
         z-index: -1;
         transition: 0;
     }

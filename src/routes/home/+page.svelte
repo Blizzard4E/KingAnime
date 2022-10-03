@@ -10,7 +10,6 @@
     onMount(() => {
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 0;
-        console.log("Opacity 0")
     });
 </script>
 
@@ -27,7 +26,10 @@
 
 <style lang="scss" scoped> 
     main {
+        width: 100vw;
+        min-height: 110vh;
         scroll-snap-type: y mandatory;
+        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.96),rgba(36, 36, 36, 0.99));
     }
     nav {
         margin-bottom: 35vh;

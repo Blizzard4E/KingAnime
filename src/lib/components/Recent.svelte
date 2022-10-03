@@ -104,15 +104,15 @@
                         </div>
                     </div>
                     <div class="row-2">
-                        <a href="../" class="thumbnail">
+                        <div on:click={() => transitionStart("/anime/"+ anime.anime.slug + "/" + anime.number)} class="thumbnail">
                             {#if anime.image != null}
                                 <img class="video-img" src="{anime.image}" alt="Episode Thumbnail">
                                 <img class="play" src="/images/play.png" alt="">
                             {:else}
-                                <div class="center"><h5>No Thumbnail</h5></div>
+                                <img class="video-img" src="{anime.anime.coverImage}" alt="Episode Thumbnail">
                                 <img class="play" src="/images/play.png" alt="">
                             {/if} 
-                        </a>
+                        </div>
                         <h3>Epiode {anime.number}</h3>
                     </div>
                     <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
@@ -132,6 +132,7 @@
     .grid {
         width: 1400px;
         padding: 1rem;
+        padding-bottom: 5rem;
         margin-left: 17.5%;
         margin-right: 20%;
         overflow: hidden;
@@ -224,6 +225,8 @@
                     width: $item-width;
                     aspect-ratio: 7/8.5; 
                     transition: 0.3s ease-out;
+                    cursor: pointer;
+
                     img {
                         display: block;
                         clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
@@ -255,6 +258,7 @@
                         white-space: nowrap;
                         text-overflow: ellipsis;
                         overflow: hidden;
+                        cursor: pointer;
                     }
                     h4 {
                         line-height: 1.2;
@@ -354,6 +358,7 @@
                     height: 100%;
                     transition: 0.3s ease-in-out;
                     object-fit: cover;
+                    object-position: center;
                 }
                 .play {
                     position: absolute;

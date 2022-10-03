@@ -8,6 +8,11 @@
 	 * @type {number}
 	 */
     let currentTheme;
+    let allowEp = 12;
+    /**
+	 * @type {string | any[]}
+	 */
+    let episodes = [];
 
     THEME.subscribe(value => {
         currentTheme = value;
@@ -33,12 +38,14 @@
     }
 
     /**
-    * @param {RequestInfo | URL | null} imgPath
-    */
-    function fixImgURL(imgPath) {
+	 * @param {RequestInfo | URL | null} imgPath
+	 * @param {{ coverImage: any; }} anime
+	 */
+    function fixImgURL(imgPath, anime) {
         if(imgPath == null) {
+            console.log(anime.coverImage);
             return new Promise((resolve) => {
-                resolve(imgPath);
+                resolve(anime.coverImage);
             })
         }
         else {
@@ -67,18 +74,33 @@
             })
         }
     }
-    
-    let allowEp = 12;
 
     /**
-	 * @param {{ episodes: string | any[]; }} anime
+	 * @param {any} anime
 	 */
     async function allowMoreEp(anime) {
-        if(allowEp + 10 >= anime.episodes.length) {
-            allowEp = anime.episodes.length;
+        if(allowEp == episodes.length) return;
+        if(allowEp + 12 >= episodes.length) {
+            let count = 1;
+            for (const episode of episodes) {
+                if(count == episodes.length + 1) break;
+                if(count > allowEp) {
+                    episode.image = await fixImgURL(episode.image, anime);
+                }
+                count++;
+            }
+            allowEp = episodes.length;
         }
         else {
-            allowEp += 10;
+            let count = 1;
+            for (const episode of episodes) {
+                if(count == allowEp + 13) break;
+                if(count > allowEp) {
+                    episode.image = await fixImgURL(episode.image, anime);
+                }
+                count++;
+            }
+            allowEp += 12;
         }
     }
 
@@ -88,14 +110,18 @@
     async function fixData(anime) {
         const newAnimeTitle = await fixAnimeTitle(anime.title);
         anime.title = newAnimeTitle;
-        if(anime.episodes.length > 30) {
-            allowEp = 30;
+        anime.episodes.reverse();
+        if(anime.episodes.length > 28) {
+            allowEp = 28;
         }
         else {
-            for (const episode of anime.episodes) {
-                episode.image = await fixImgURL(episode.image);
-            }
             allowEp = anime.episodes.length;
+        }
+        let count = 1;
+        for (const episode of anime.episodes) {
+            episode.image = await fixImgURL(episode.image, anime);
+            if(count == allowEp) break;
+            else count++;
         }
         return anime;
     }
@@ -104,8 +130,8 @@
         const response = await fetch('https://api.enime.moe/anime/' + data.anime);
         const result = await response.json();
         let anime = await fixData(await result);
+        episodes = anime.episodes;
         anime.youtubeID = await getYoutubeLink(anime.mappings.kitsu);
-        anime.episodes.reverse();
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 0;
         return anime;
@@ -169,7 +195,10 @@
     </div>
     <div class="bg-2">
         <div class="container">
-            <h1><span>{anime.title[0]}</span>{anime.title}</h1>
+            <div style="display: flex;">
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{anime.title[0]}</span>
+                <h1>{anime.title}</h1>
+            </div>
             <h4>Genre:
                 {#each anime.genre as genre}
                     <!-- svelte-ignore a11y-missing-attribute -->
@@ -179,26 +208,22 @@
             <p>{@html anime.description}</p>
             <h4>Episodes:</h4>
             <ul>
-                {#if allowEp > 24}
-                    {#each Array(allowEp) as _, i}
-                        {anime.episodes[i].number}
-                    {/each}
-                {:else}
-                    {#each Array(allowEp) as _, i}
-                        <li>
-                            <div class="content">
-                                <div style="position: relative;width: 100%; overflow: hidden;">
-                                    <img src="/images/play.png" alt="">
-                                    <img src={anime.episodes[i].image} alt="">
-                                </div>
-                                <h5>Epiosode {anime.episodes[i].number}</h5>
+                {#each Array(allowEp) as _, i}
+                    <li on:click={() => transitionStart("/anime/" + anime.slug + "/" + episodes[i].number)}>
+                        <div class="content">
+                            <div style="position: relative;width: 100%; overflow: hidden;">
+                                <img src="/images/play.png" alt="">
+                                <img src={episodes[i].image} alt="">
                             </div>
-                            <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
-                        </li>
-                    {/each}
-                {/if}
-                <button on:click={() => {allowMoreEp(anime)}}>Show more</button>
+                            <h5>Episode {episodes[i].number}</h5>
+                        </div>
+                        <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                    </li>
+                {/each}
             </ul>
+            {#if allowEp < episodes.length}
+                <div class="show-btn"><button on:click={() => {allowMoreEp(anime)}}>Show more...</button></div>
+            {/if}
         </div>
     </div>
     {/await}
@@ -216,6 +241,7 @@
     .bg-2 {
         width: 100vw;
         background: rgba(36, 36, 36, 0.9);
+        padding-bottom: 4rem;
     }
     .container {
         margin: auto 18%;
@@ -227,13 +253,28 @@
         line-height: 1;
         color: white;
         font-weight: bold;
-
-        span {
-            
-        }
         &::first-letter {
             font-size: 0;
         }
+    }
+    span {
+        font-size: 2.5rem;
+        padding-top: 1rem;
+        line-height: 1;
+        color: white;
+        font-weight: bold;
+        font-family: 'Seagram', sans-serif;
+        margin-right: 0.1rem; 
+    }
+    span.gold {
+        background: linear-gradient($goldDark, $goldDark, $goldBright, $goldDark, $goldDark);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    span.crimson {
+        background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     h4 {
         line-height: 1.2;
@@ -286,6 +327,26 @@
     #yt-player {
         width: 100%;
         height: 100%;
+    }
+    .show-btn {
+        width: 100%;
+        display: grid;
+        place-items: center;
+
+        button {
+            cursor: pointer;
+            background: transparent;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            font-weight: normal;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            transition: 0.25s ease-in-out;
+
+            &:hover {
+                color: white;
+            }
+        }
     }
     .grid {
         margin-top: 2rem;
@@ -345,13 +406,16 @@
         grid-template-columns: repeat(4, 1fr);
         column-gap: 1.5rem;
         row-gap: 1.5rem;
-        padding-bottom: 2rem;
+        padding-bottom: 1rem;
 
         li {
             position: relative;
             width: 100%;
             display: grid;
             place-items: center;
+            animation: FadeIn;
+            animation-duration: 1s;
+            animation-timing-function: ease-in-out;
 
             &:hover {
                 cursor: pointer;
@@ -372,7 +436,8 @@
                 z-index: 1;
                 display: grid;
                 place-items: center;
-                background-color: rgba(36, 36, 36, 1);background-color: rgba(36, 36, 36, 1);
+                background-color: rgba(36, 36, 36, 1);
+                width: 100%; 
 
                 img {
                     display: block;
@@ -390,7 +455,10 @@
                     
                     &:nth-child(2) {
                         width: 100%;
+                        object-fit: cover;
+                        object-position: center;
                         transform: scale(1.2);
+                        max-height: 160px;
                     }
                 }
             }
@@ -427,5 +495,9 @@
                 background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);
             }
         }
+    }
+    @keyframes FadeIn {
+        from { opacity: 0;}
+        to  {opacity: 1;}
     }
 </style>
