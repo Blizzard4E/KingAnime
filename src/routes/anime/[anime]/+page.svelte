@@ -236,11 +236,11 @@
     }
     .bg-1 {
         width: 100vw;
-        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.7),rgba(36, 36, 36, 0.9));
+        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.7), rgba(36, 36, 36, 0.9), rgba(36, 36, 36, 0.95),rgba(36, 36, 36, 0.99));
     }
     .bg-2 {
         width: 100vw;
-        background: rgba(36, 36, 36, 0.9);
+        background: rgba(36, 36, 36, 0.99);
         padding-bottom: 4rem;
     }
     .container {

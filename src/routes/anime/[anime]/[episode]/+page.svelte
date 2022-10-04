@@ -95,7 +95,7 @@
     main {
         width: 100vw;
         min-height: 110vh;
-        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.9), rgba(36, 36, 36, 0.95),rgba(36, 36, 36, 0.99));
+        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.8),rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.99), rgba(36, 36, 36, 0.99),rgba(36, 36, 36, 0.99));
     }
     section{
         width: 100vw;

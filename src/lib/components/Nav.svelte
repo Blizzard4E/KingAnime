@@ -5,6 +5,7 @@
 
 	import { onMount } from 'svelte';
     import { THEME } from '../stores';
+	import SearchBar from './SearchBar.svelte';
 
     /**
 	 * @type {number}
@@ -70,6 +71,7 @@
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
         </h1>
+        <SearchBar/>
         <section>
             <div class="theme" class:active={currentTheme == 0}>
                 <div on:click={() => {setTheme(0)}} id="gold"></div>

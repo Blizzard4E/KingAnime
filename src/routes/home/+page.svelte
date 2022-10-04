@@ -8,8 +8,10 @@
     import { onMount } from 'svelte';
 
     onMount(() => {
-        // @ts-ignore
-        document.getElementById('transition-screen').style.opacity = 0;
+        setTimeout(() => {
+            // @ts-ignore
+            document.getElementById('transition-screen').style.opacity = 0;
+        }, 1000)
     });
 </script>
 
