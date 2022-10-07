@@ -11,6 +11,10 @@
 	 * @type {number}
 	 */
     let slidesAmount;
+    /**
+	 * @type {string | number | NodeJS.Timeout | undefined}
+	 */
+    let timer;
 
     THEME.subscribe(value => {
         currentTheme = value;
@@ -36,6 +40,11 @@
         let pos = i + 1;
         // @ts-ignore
         document.getElementById("carousel").style.transform = "translateX(-" + pos + "00%) perspective(1px)";
+        autoSlide();
+    }
+    function autoSlide() {
+        clearTimeout(timer);
+        timer = setTimeout(() => nextSlide(), 2000);
     }
     /**
 	 * @param {{ bannerImage: null; coverImage: any; }} anime
@@ -67,6 +76,7 @@
         const result = await response.json(); 
         slidesAmount = result.data.length;
         const animes = fixData(await result.data);
+        autoSlide();
         return animes;
     }
     /**

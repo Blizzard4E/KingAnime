@@ -1,14 +1,15 @@
 <script>
-// @ts-nocheck
-
 
 	import { goto } from '$app/navigation';
 	import { THEME } from '$lib/stores'; 
-	import { each } from 'svelte/internal';
     /**
 	 * @type {number}
 	 */
     let currentTheme;
+    /**
+	 * @type {number}
+	 */
+    export let page;
 
     THEME.subscribe(value => {
         currentTheme = value;
@@ -62,26 +63,29 @@
         }
         return animes;
     }
-    async function fetchRecent() {
+    /**
+	 * @param {string | number} pageNum
+	 */
+    async function fetchRecent(pageNum) {
         console.log("Fetching Recent Animes");
-        const response = await fetch('https://api.enime.moe/recent');
+        const response = await fetch('https://api.enime.moe/recent?page=' + pageNum + '&perPage=15');
         const result = await response.json(); 
         const animes = await fixData(await result.data);
         let splitCount = 0;
         let count = 0;
-        let recents = [[], [], [], []];
+        let recents = [[], [], []];
 
         for (let i = 0; i < animes.length; i++) {
             // @ts-ignore
             recents[splitCount][count] = animes[i];
-            console.log(recents[splitCount][count]);
             count++;
             if(count == 5) {
                 count = 0;
                 splitCount++;
             }
         }
-        console.log(recents);
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 0;
         return recents;
     }
     /**
@@ -92,115 +96,65 @@
         document.getElementById('transition-screen').style.opacity = 1;
         setTimeout(() => {
             goto(path);
-        }, 1500);
+        }, 1000);
     }
 </script>
 
-<main>
-    {#await fetchRecent()}
-        <!-- promise is pending -->
-    {:then recentAnimes}
-        <div class="container">
-            <div class="grid">
-                <h1><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>R</span>ecent</h1>
-                {#each recentAnimes as animes} 
-                <ul>
-                    {#each animes as anime}
-                        <li>
-                            <div class="item" class:back-light={currentTheme == 1}>
-                                <div class="row-1">
-                                    <div on:click={() => transitionStart("/anime/"+ anime.anime.slug)} class="col-1">
-                                        <img src="{anime.anime.coverImage}" alt="">
-                                    </div>
-                                    <div class="col-2">
-                                        <div class="info">
-                                            <h2 on:click={() => transitionStart("/anime/"+ anime.anime.slug)}><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
-                                            <h4>Genre:
-                                                {#each anime.anime.genre as genre}
-                                                    <!-- svelte-ignore a11y-missing-attribute -->
-                                                    <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
-                                                {/each}
-                                            </h4>
-                                            <p>{@html anime.anime.description}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row-2">
-                                    <div on:click={() => transitionStart("/anime/"+ anime.anime.slug + "/" + anime.number)} class="thumbnail">
-                                        {#if anime.image != null}
-                                            <img class="video-img" src="{anime.image}" alt="Episode Thumbnail">
-                                            <img class="play" src="/images/play.png" alt="">
-                                        {:else}
-                                            <img class="video-img" src="{anime.anime.coverImage}" alt="Episode Thumbnail">
-                                            <img class="play" src="/images/play.png" alt="">
-                                        {/if} 
-                                    </div>
-                                    <h3>Epiode {anime.number}</h3>
-                                </div>
-                                <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+{#await fetchRecent(page)}
+    <!-- promise is pending -->
+{:then recentAnimes}
+    {#each recentAnimes as animes} 
+    <ul>
+        {#each animes as anime}
+            <li>
+                <div class="item" class:back-light={currentTheme == 1}>
+                    <div class="row-1">
+                        <div on:click={() => transitionStart("/anime/"+ anime.anime.slug)} class="col-1">
+                            <img src="{anime.anime.coverImage}" alt="">
+                        </div>
+                        <div class="col-2">
+                            <div class="info">
+                                <h2 on:click={() => transitionStart("/anime/"+ anime.anime.slug)}><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
+                                <h4>Genre:
+                                    {#each anime.anime.genre as genre}
+                                        <!-- svelte-ignore a11y-missing-attribute -->
+                                        <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
+                                    {/each}
+                                </h4>
+                                <p>{@html anime.anime.description}</p>
                             </div>
-                        </li>
-                    {/each}
-                </ul>  
-                {/each}
-            </div>
-        </div>
-    {/await}
-</main>
+                        </div>
+                    </div>
+                    <div class="row-2">
+                        <div on:click={() => transitionStart("/anime/"+ anime.anime.slug + "/" + anime.number)} class="thumbnail">
+                            {#if anime.image != null}
+                                <img class="video-img" src="{anime.image}" alt="Episode Thumbnail">
+                                <img class="play" src="/images/play.png" alt="">
+                            {:else}
+                                <img class="video-img" src="{anime.anime.coverImage}" alt="Episode Thumbnail">
+                                <img class="play" src="/images/play.png" alt="">
+                            {/if} 
+                        </div>
+                        <h3>Epiode {anime.number}</h3>
+                    </div>
+                    <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                </div>
+            </li>
+        {/each}
+    </ul>  
+    {/each}
+{/await}
 
 <style lang="scss">
-    $item-width: 170px;
-    main {
-        width: 100vw;
-        background: linear-gradient(rgba(36, 36, 36, 0.1),rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.8));
-    }
-    .grid {
-        width: 1100px;
-        padding: 1rem;
-        overflow: hidden;
-        animation: DropIn;
-        animation-duration: 1.25s;
-        animation-timing-function: ease-in-out;
-        animation-fill-mode: forwards;
-        transform: translateY(50%);
-        opacity: 0;
-    }
-    .container {
-        margin: auto 18%;
-    }
-    @keyframes DropIn {
-        0%  {
-            transform: translateY(50%);
+    $item-width: 170px; 
+    @keyframes popIn {
+        from { 
             opacity: 0;
+            transform: scale(0);
         }
-        40% {
-            opacity: 0;
-        }
-        100% {
-            transform: translateY(0);
+        to { 
             opacity: 1;
-        }
-    }
-    h1 {
-        user-select: none;
-        font-family: 'Fandango Bold', sans-serif;
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        color: white;
-        font-weight: normal;
-        filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
-        span {
-            font-family: 'Seagram', sans-serif;
-        }
-        .gold {
-            background: linear-gradient($goldDark, $goldDark, $goldBright, $goldDark, $goldDark);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .crimson {
-            background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            transform: scale(1);
         }
     }
     ul {
@@ -208,8 +162,9 @@
         grid-template-columns: repeat(5, 1fr); 
         column-gap: 1rem;
         transition: 0.3s ease-out;
-        margin-right: 1.289%; 
         margin-bottom: 1.5rem;
+        z-index: 1;
+        position: relative;
 
         li {
             display: flex;
@@ -220,6 +175,11 @@
             position: relative;
             width: $item-width;
             transition: 0.3s ease-out;
+            animation: popIn;
+            animation-duration: 0.8s;
+            animation-timing-function: ease-in-out;
+            animation-fill-mode: forwards;
+            opacity: 0;
 
             &:hover {
                 width: calc($item-width * 2.1);

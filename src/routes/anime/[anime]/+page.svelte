@@ -324,10 +324,6 @@
         overflow: hidden;
         margin-bottom: 1rem;
     }
-    #yt-player {
-        width: 100%;
-        height: 100%;
-    }
     .show-btn {
         width: 100%;
         display: grid;

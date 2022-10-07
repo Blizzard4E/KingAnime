@@ -71,16 +71,18 @@
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
         </h1>
-        <SearchBar/>
-        <section>
-            <div class="theme" class:active={currentTheme == 0}>
-                <div on:click={() => {setTheme(0)}} id="gold"></div>
-            </div>
-            <div class="line"></div>
-            <div class="theme" class:active={currentTheme == 1}>
-                <div on:click={() => {setTheme(1)}} id="crimson"></div>
-            </div>
-        </section>
+        <div style="display: flex;">
+            <SearchBar/>
+            <section>
+                <div class="theme" class:active={currentTheme == 0}>
+                    <div on:click={() => {setTheme(0)}} id="gold"></div>
+                </div>
+                <div class="line"></div>
+                <div class="theme" class:active={currentTheme == 1}>
+                    <div on:click={() => {setTheme(1)}} id="crimson"></div>
+                </div>
+            </section>
+        </div>
     </nav>
 </main>
 
@@ -126,6 +128,7 @@
         }
     }
     section {
+        margin-left: 2rem;
         display: flex;
         align-items: center;
         filter: drop-shadow(0 0 16px rgba(0, 0, 0, 0.3));
