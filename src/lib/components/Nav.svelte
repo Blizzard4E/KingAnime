@@ -5,6 +5,7 @@
 
 	import { onMount } from 'svelte';
     import { THEME } from '../stores';
+	import BgVideo from './BgVideo.svelte';
 	import SearchBar from './SearchBar.svelte';
 
     /**
@@ -66,6 +67,7 @@
 </script>
 
 <main>  
+    <BgVideo/>
     <nav>
         <h1 on:click={() => goHome()}>
             <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  

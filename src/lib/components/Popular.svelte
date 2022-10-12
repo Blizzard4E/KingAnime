@@ -1,6 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { THEME } from '$lib/stores'; 
+	import { THEME } from '$lib/stores';
+	import { onMount } from 'svelte';
 
     /**
 	 * @type {number}
@@ -15,10 +16,16 @@
 	 * @type {string | number | NodeJS.Timeout | undefined}
 	 */
     let timer;
+    let loaded = false;
+
+    onMount(() => {
+        setTimeout(autoSlide, 5000);
+    })
 
     THEME.subscribe(value => {
         currentTheme = value;
-    })
+    }) 
+
     function nextSlide() {
         if(slide + 1 >= slidesAmount) {
             slide = 0;
@@ -62,11 +69,28 @@
         }
     }
     /**
+	 * @param {{ english: null; userPreferred: any; }} title
+	 */
+     function fixAnimeTitle(title) {
+        if(title.english == null) {
+            return new Promise((resolve) => {
+                resolve(title.userPreferred);
+            })
+        }
+        else {
+            return new Promise((resolve) => {
+                resolve(title.english);
+            })
+        }
+    }
+    /**
 	 * @param {any} animes
 	 */
     async function fixData(animes) {
         for (const anime of animes) {
             anime.bannerImage = await fixBanner(anime);
+            const newAnimeTitle = await fixAnimeTitle(anime.title);
+            anime.title = newAnimeTitle;
         }
         return animes;
     }
@@ -75,8 +99,8 @@
         const response = await fetch('https://api.enime.moe/popular');
         const result = await response.json(); 
         slidesAmount = result.data.length;
-        const animes = fixData(await result.data);
-        autoSlide();
+        const animes = fixData(await result.data); 
+        loaded = true;
         return animes;
     }
     /**
@@ -89,7 +113,7 @@
             goto(path);
         }, 1500);
     }
-</script>
+</script> 
 
 <main>
     <!-- svelte-ignore empty-block -->
@@ -105,7 +129,7 @@
         arrow_back_ios
         </span>
     </div>
-    <div id="carousel" class:back-light={currentTheme == 1}>
+    <div id="carousel" class:back-light={currentTheme == 1}> 
         <div class="slide" style={
             "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].bannerImage + "');" +
             "background-size: cover;" + 
@@ -116,7 +140,7 @@
                     <span>{genre}</span>
                 {/each}
             </h3>
-            <h2>{popular_animes[popular_animes.length - 1].title.english}</h2>
+            <h2>{popular_animes[popular_animes.length - 1].title}</h2>
         </div>
         {#each popular_animes as anime, i}
         <div on:click={() => transitionStart('/anime/' + anime.slug)} class="slide" class:active={slide == i} style={
@@ -129,7 +153,7 @@
                     <span>{genre}</span>
                 {/each}
             </h3>
-            <h2>{anime.title.english}</h2>
+            <h2>{anime.title}</h2>
         </div>
         {/each}
         <div class="slide" style={
@@ -142,7 +166,7 @@
                     <span>{genre}</span>
                 {/each}
             </h3>
-            <h2>{popular_animes[0].title.english}</h2>
+            <h2>{popular_animes[0].title}</h2>
         </div>
     </div>
     {/await}
@@ -250,7 +274,7 @@
     .slide {
         cursor: pointer;
         min-width: 100%;
-        min-height: 30vh;
+        aspect-ratio: 16/9;
         transition: 0.25s ease-in-out;
         filter: brightness(0.45);
         transform: scale(0.8) translateZ(0);

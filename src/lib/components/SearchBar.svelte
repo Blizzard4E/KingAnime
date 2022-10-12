@@ -1,9 +1,23 @@
 <script>
+	import { goto } from "$app/navigation";
 
+
+    let anime = "";
+
+    /**
+	 * @param {string | URL} path
+	 */
+    function transitionStart(path) {
+        // @ts-ignore
+        document.getElementById('transition-screen').style.opacity = 1;
+        setTimeout(() => {
+            goto(path);
+        }, 1000);
+    }
 </script>
 
-<form on:submit|preventDefault={() => {}}>
-    <input type="text" placeholder="Search anime...">
+<form on:submit|preventDefault={() => transitionStart("/search/" + anime)}>
+    <input bind:value={anime} type="text" placeholder="Search anime...">
     <span class="material-symbols-outlined search-icon">
     search
     </span>

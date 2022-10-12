@@ -110,6 +110,9 @@
     async function fixData(anime) {
         const newAnimeTitle = await fixAnimeTitle(anime.title);
         anime.title = newAnimeTitle;
+        if(anime.description == null) {
+            anime.description = "This anime does not have a description.";
+        }
         anime.episodes.reverse();
         if(anime.episodes.length > 28) {
             allowEp = 28;
@@ -174,8 +177,6 @@
 </script>
 
 <main>
-    <BgVideo/>
-    <Nav/>
     {#await fetchAnime()}
     <!-- promise is pending -->
     {:then anime}

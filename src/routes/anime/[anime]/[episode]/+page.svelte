@@ -62,8 +62,6 @@
 </script>
 
 <main>
-    <BgVideo/>
-    <Nav/>
     {#await fetchAnime()}
         <!-- promise is pending -->
     {:then anime}

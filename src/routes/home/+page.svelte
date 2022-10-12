@@ -37,10 +37,6 @@
 </script>
 
 <main>
-    <nav>
-        <BgVideo/>
-        <Nav/>
-    </nav>
     <Popular/>
     <div class="container">
         <div class="grid">
@@ -70,12 +66,10 @@
 
 <style lang="scss" scoped> 
     main {
+        padding-top: 35vh;
         width: 100vw;
         min-height: 110vh; 
         background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.96),rgba(36, 36, 36, 0.99));
-    }
-    nav {
-        margin-bottom: 35vh;
     }
     h1 {
         cursor: pointer;
