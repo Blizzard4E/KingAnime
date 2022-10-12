@@ -84,7 +84,7 @@
         <div class="container video-player">
             {#each videoPlayers as video, i}
                 {#if currentSource == i}
-                    <iframe scrolling="no" title="video-player" src={video} frameborder="0"></iframe>
+                    <iframe scrolling="no" title="video-player" src={video} frameborder="0" allowfullscreen></iframe>
                 {/if}
             {/each}
             <div class="controls">
