@@ -47,6 +47,9 @@
         const response = await fetch('https://api.enime.moe/anime/' + data.anime);
         const result = await response.json();
         let anime = await fixData(await result);
+        if(anime.description == null  || anime.description == "") {
+            anime.description = "This anime does not have a description.";
+        }
         return anime;
     }
     /**

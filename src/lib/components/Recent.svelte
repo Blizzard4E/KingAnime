@@ -1,4 +1,6 @@
 <script>
+// @ts-nocheck
+
 
 	import { goto } from '$app/navigation';
 	import { THEME } from '$lib/stores'; 
@@ -58,6 +60,9 @@
         for (const anime of animes) {
             const newImgURL = await fixImgURL(anime.image);
             const newAnimeTitle = await fixAnimeTitle(anime.anime.title);
+            if(anime.anime.description == null || anime.anime.description == "") {
+                anime.anime.description = "This anime does not have a description.";
+            }
             anime.image = newImgURL;
             anime.anime.title = newAnimeTitle;
         }
@@ -197,9 +202,6 @@
                     margin-bottom: 0.3rem;
                     margin-top: 0.3rem;
                 }
-                .row-2 .thumbnail h5 {
-                    font-size: 2rem;
-                }
             }
 
             .row-1 {
@@ -318,28 +320,9 @@
 
                     &:hover {
                         cursor: pointer;
-                        .video-img, h5 {
-                            filter: brightness(0.6);
-                        }
                         .play {
                             opacity: 1;
                         }
-                    }
-
-                    .center {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        width: 100%;
-                        height: 100%;
-                    }
-
-                    h5 {
-                        font-family: 'Quicksand', sans-serif;
-                        font-size: 0;
-                        font-weight: normal;
-                        color: white;
-                        transition: 0.3s ease-in-out;
                     }
                 }
                 .video-img {

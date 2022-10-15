@@ -13,6 +13,7 @@
 	 * @type {string | any[]}
 	 */
     let episodes = [];
+    let haveKitsu = true;
 
     THEME.subscribe(value => {
         currentTheme = value;
@@ -110,7 +111,7 @@
     async function fixData(anime) {
         const newAnimeTitle = await fixAnimeTitle(anime.title);
         anime.title = newAnimeTitle;
-        if(anime.description == null) {
+        if(anime.description == null  || anime.description == "") {
             anime.description = "This anime does not have a description.";
         }
         anime.episodes.reverse();
@@ -134,7 +135,13 @@
         const result = await response.json();
         let anime = await fixData(await result);
         episodes = anime.episodes;
-        anime.youtubeID = await getYoutubeLink(anime.mappings.kitsu);
+        if(Object.values(anime.mappings).includes('kitsu')) {
+            anime.youtubeID = await getYoutubeLink(anime.mappings.kitsu);
+            haveKitsu = true;
+        }
+        else {
+            haveKitsu = false;
+        }
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 0;
         return anime;
@@ -186,10 +193,14 @@
                 <div class="col-1" style={"background: radial-gradient(transparent, transparent, rgba(36, 36, 36, 0.1), rgba(36, 36, 36, 0.9)), url('" + anime.coverImage + "');" + "background-position: center;" + "background-size: cover;"}>
                 </div>
                 <div class="col-2">
-                    <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
-                    <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
-                    <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-                    </iframe>
+                    {#if haveKitsu}
+                        <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
+                        <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
+                        <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                        </iframe>
+                    {:else}
+                        <img class="thumbnail" src={anime.coverImage} alt="">
+                    {/if}
                 </div>
             </div>
         </div>

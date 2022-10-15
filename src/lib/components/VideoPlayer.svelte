@@ -144,11 +144,13 @@
         }
         span.gold {
             background: linear-gradient($goldDark, $goldBright, $goldDark);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         span.crimson {
             background: linear-gradient($crimsonDark, $crimsonBright, $crimsonDark);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
