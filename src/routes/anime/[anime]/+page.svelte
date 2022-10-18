@@ -135,11 +135,11 @@
         const result = await response.json();
         let anime = await fixData(await result);
         episodes = anime.episodes;
-        if(Object.values(anime.mappings).includes('kitsu')) {
+        try {
             anime.youtubeID = await getYoutubeLink(anime.mappings.kitsu);
             haveKitsu = true;
         }
-        else {
+        catch {
             haveKitsu = false;
         }
         // @ts-ignore
