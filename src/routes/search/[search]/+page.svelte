@@ -31,7 +31,7 @@ import { THEME } from '$lib/stores';
     function searchAnime() {
         clearTimeout(timer);
         timer = setTimeout(() => {
-            searchedAnime = searchValue.value;
+            searchedAnime = encodeURIComponent(searchValue.value);
         }, 800);
     }
 </script>
@@ -44,7 +44,7 @@ import { THEME } from '$lib/stores';
             </span>
             <input on:keydown={searchAnime} bind:this={searchValue} type="text" placeholder="Search Anime...">
         </form>
-        <SearchResults searchedName={searchedAnime} page={1}/>
+        <SearchResults searchedName={searchedAnime}/>
     </div>
 </main>
 

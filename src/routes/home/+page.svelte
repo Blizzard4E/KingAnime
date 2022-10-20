@@ -43,23 +43,9 @@
             <h1 on:click={resetPage}><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>R</span>ecent</h1>
         </div>
     </div>
-    <div class="container">
-        <div class="grid" style="min-height: 820px; padding: 0.5rem;">
-            <Recent bind:page={recentPage}/>
-            <div class="page-control">
-                <button class="prev" on:click|preventDefault={() => nextPage(false)} class:invis={recentPage - 1 < 1}>
-                    <span class="material-symbols-outlined" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                        arrow_back_ios
-                    </span>
-                </button>
-                {#if recentPage + 1 > 0}
-                    <button class="next" on:click={() => nextPage(true)} class:invis={recentPage + 1 > 10}>
-                        <span class="material-symbols-outlined" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                        arrow_forward_ios
-                        </span>
-                    </button>
-                {/if}
-            </div>
+    <div class="container" style="padding-bottom: 2rem">
+        <div class="grid">
+            <Recent/>
         </div>
     </div> 
 </main>

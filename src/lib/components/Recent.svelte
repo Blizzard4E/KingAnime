@@ -8,10 +8,15 @@
 	 * @type {number}
 	 */
     let currentTheme;
+    let recentAnimes = [];
     /**
 	 * @type {number}
 	 */
-    export let page;
+    let page = 1;
+    /**
+	 * @type {number}
+	 */
+    let maxPage;
 
     THEME.subscribe(value => {
         currentTheme = value;
@@ -69,29 +74,23 @@
         return animes;
     }
     /**
-	 * @param {string | number} pageNum
+	 * @param {string | number} page
 	 */
-    async function fetchRecent(pageNum) {
+    async function fetchRecent() {
         console.log("Fetching Recent Animes");
-        const response = await fetch('https://api.enime.moe/recent?page=' + pageNum + '&perPage=15');
+        const response = await fetch('https://api.enime.moe/recent?page=' + 1 + '&perPage=15');
         const result = await response.json(); 
-        const animes = await fixData(await result.data);
-        let splitCount = 0;
-        let count = 0;
-        let recents = [[], [], []];
-
-        for (let i = 0; i < animes.length; i++) {
-            // @ts-ignore
-            recents[splitCount][count] = animes[i];
-            count++;
-            if(count == 5) {
-                count = 0;
-                splitCount++;
-            }
-        }
-        // @ts-ignore
-        document.getElementById('transition-screen').style.opacity = 0;
-        return recents;
+        maxPage = result.meta.lastPage;
+        const animes = await fixData(await result.data); 
+        recentAnimes = animes;
+        return recentAnimes;
+    }
+    async function fetchMoreAnimes() {
+        page++;
+        const response = await fetch('https://api.enime.moe/recent?page=' + page + '&perPage=15');
+        const result = await response.json();
+        const animes = await fixData(await result.data); 
+        recentAnimes = recentAnimes.concat(animes);
     }
     /**
 	 * @param {string | URL} path
@@ -105,52 +104,73 @@
     }
 </script>
 
-{#await fetchRecent(page)}
+<ul>
+    {#await fetchRecent()}
     <!-- promise is pending -->
-{:then recentAnimes}
-    {#each recentAnimes as animes} 
-    <ul>
-        {#each animes as anime}
-            <li>
-                <div class="item" class:back-light={currentTheme == 1}>
-                    <div class="row-1">
-                        <div on:click={() => transitionStart("/anime/"+ anime.anime.slug)} class="col-1">
-                            <img src="{anime.anime.coverImage}" alt="">
-                        </div>
-                        <div class="col-2">
-                            <div class="info">
-                                <h2 on:click={() => transitionStart("/anime/"+ anime.anime.slug)}><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
-                                <h4>Genre:
-                                    {#each anime.anime.genre as genre}
-                                        <!-- svelte-ignore a11y-missing-attribute -->
-                                        <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
-                                    {/each}
-                                </h4>
-                                <p>{@html anime.anime.description}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row-2">
-                        <div on:click={() => transitionStart("/anime/"+ anime.anime.slug + "/" + anime.number)} class="thumbnail">
-                            {#if anime.image != null}
-                                <img class="video-img" src="{anime.image}" alt="Episode Thumbnail">
-                                <img class="play" src="/images/play.png" alt="">
-                            {:else}
-                                <img class="video-img" src="{anime.anime.coverImage}" alt="Episode Thumbnail">
-                                <img class="play" src="/images/play.png" alt="">
-                            {/if} 
-                        </div>
-                        <h3>Epiode {anime.number}</h3>
-                    </div>
-                    <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+{:then value}
+    {#each recentAnimes as anime}
+    <li>
+        <div class="item" class:back-light={currentTheme == 1}>
+            <div class="row-1">
+                <div on:click={() => transitionStart("/anime/"+ anime.anime.slug)} class="col-1">
+                    <img src="{anime.anime.coverImage}" alt="">
                 </div>
-            </li>
-        {/each}
-    </ul>  
+                <div class="col-2">
+                    <div class="info">
+                        <h2 on:click={() => transitionStart("/anime/"+ anime.anime.slug)}><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
+                        <h4>Genre:
+                            {#each anime.anime.genre as genre}
+                                <!-- svelte-ignore a11y-missing-attribute -->
+                                <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
+                            {/each}
+                        </h4>
+                        <p>{@html anime.anime.description}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row-2">
+                <div on:click={() => transitionStart("/anime/"+ anime.anime.slug + "/" + anime.number)} class="thumbnail">
+                    {#if anime.image != null}
+                        <img class="video-img" src="{anime.image}" alt="Episode Thumbnail">
+                        <img class="play" src="/images/play.png" alt="">
+                    {:else}
+                        <img class="video-img" src="{anime.anime.coverImage}" alt="Episode Thumbnail">
+                        <img class="play" src="/images/play.png" alt="">
+                    {/if} 
+                </div>
+                <h3>Episode {anime.number}</h3>
+            </div>
+            <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+        </div>
+    </li>
     {/each}
 {/await}
+</ul>
+{#if page < maxPage}
+    <div class="show-btn"><button on:click={() => {fetchMoreAnimes()}}>Show more...</button></div>
+{/if}
 
 <style lang="scss">
+    .show-btn {
+        width: 100%;
+        display: grid;
+        place-items: center;
+
+        button {
+            cursor: pointer;
+            background: transparent;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+            font-weight: normal;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            transition: 0.25s ease-in-out;
+
+            &:hover {
+                color: white;
+            }
+        }
+    }
     $item-width: 170px; 
     @keyframes popIn {
         from { 
@@ -166,6 +186,7 @@
         display: grid;
         grid-template-columns: repeat(5, 1fr); 
         column-gap: 1rem;
+        row-gap: 1rem;
         transition: 0.3s ease-out;
         margin-bottom: 1.5rem;
         z-index: 1;
@@ -316,10 +337,13 @@
                     position: relative;
                     width: 0;
                     height: 0;
-                    transition: 0.3s ease-out; 
+                    transition: 0.3s ease-out;
 
                     &:hover {
                         cursor: pointer;
+                        .video-img {
+                            filter: brightness(0.6); 
+                        }
                         .play {
                             opacity: 1;
                         }
