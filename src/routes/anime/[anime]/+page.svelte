@@ -1,6 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
 	import BgVideo from '$lib/components/BgVideo.svelte';
+	import MediaQuery from '$lib/components/MediaQuery.svelte';
     import Nav from '$lib/components/Nav.svelte';
     import { THEME } from '$lib/stores'; 
 	import { onMount } from 'svelte';
@@ -33,7 +34,10 @@
 	 * @param {number} anime_id
 	 */
     async function getYoutubeLink(anime_id) {
-        const response = await fetch('https://kitsu.io/api/edge/anime/' + anime_id);
+        const response = await fetch('https://kitsu.io/api/edge/anime/' + anime_id,{
+            method: "GET",
+            headers: {"Content-type": "application/json;charset=UTF-8"}
+        });
         const kitsu = await response.json();
         return kitsu.data.attributes.youtubeVideoId;
     }
@@ -187,72 +191,141 @@
     {#await fetchAnime()}
     <!-- promise is pending -->
     {:then anime}
-    <div class="bg-1">
-        <div class="container">
-            <div class="grid">
-                <div class="col-1" style={"background: radial-gradient(transparent, transparent, rgba(36, 36, 36, 0.1), rgba(36, 36, 36, 0.9)), url('" + anime.coverImage + "');" + "background-position: center;" + "background-size: cover;"}>
+    <MediaQuery query="(min-width: 1281px)" let:matches>
+        {#if matches}
+        <div class="bg-1">
+            <div class="container">
+                <div class="grid">
+                    <div class="col-1" style={"background: radial-gradient(transparent, transparent, rgba(36, 36, 36, 0.1), rgba(36, 36, 36, 0.9)), url('" + anime.coverImage + "');" + "background-position: center;" + "background-size: cover;"}>
+                    </div>
+                    <div class="col-2">
+                        {#if haveKitsu}
+                            <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
+                            <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
+                            <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                            </iframe>
+                        {:else}
+                            <img class="thumbnail" src={anime.coverImage} alt="">
+                        {/if}
+                    </div>
                 </div>
-                <div class="col-2">
-                    {#if haveKitsu}
-                        <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
-                        <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
-                        <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-                        </iframe>
-                    {:else}
-                        <img class="thumbnail" src={anime.coverImage} alt="">
+            </div>
+        </div>
+        <div class="bg-2">
+            <div class="container">
+                <div style="display: flex;">
+                    <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{anime.title[0]}</span>
+                    <h1>{anime.title}</h1>
+                </div>
+                <h4>Genre:
+                    {#each anime.genre as genre}
+                        <!-- svelte-ignore a11y-missing-attribute -->
+                        <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
+                    {/each}
+                </h4>
+                <p>{@html anime.description}</p>
+                <h4>Episodes:</h4>
+                <ul>
+                    {#each Array(allowEp) as _, i}
+                        <li on:click={() => transitionStart("/anime/" + anime.slug + "/" + episodes[i].number)}>
+                            <div class="content">
+                                <div style="position: relative;width: 100%; overflow: hidden;">
+                                    <img src="/images/play.png" alt="">
+                                    <img src={episodes[i].image} alt="">
+                                </div>
+                                <h5>Episode {episodes[i].number}</h5>
+                            </div>
+                            <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                        </li>
+                    {/each}
+                </ul>
+                {#if allowEp < episodes.length}
+                    <div class="show-btn"><button on:click={() => {allowMoreEp(anime)}}>Show more...</button></div>
+                {/if}
+            </div>
+        </div>
+        {/if}
+    </MediaQuery>
+    
+    <MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+        {#if matches}
+        <div class="bg-1 tablet">
+            <div class="container">
+                <div class="grid">
+                    <div class="col-1" style={"background: radial-gradient(transparent, transparent, rgba(36, 36, 36, 0.1), rgba(36, 36, 36, 0.9)), url('" + anime.coverImage + "');" + "background-position: center;" + "background-size: cover;"}>
+                    </div>
+                    <div class="col-2">
+                        {#if haveKitsu}
+                            <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
+                            <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
+                            <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                            </iframe>
+                        {:else}
+                            <img class="thumbnail" src={anime.coverImage} alt="">
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-2 tablet">
+            <div class="container">
+                <div class="info">
+                    <div style="display: flex;">
+                        <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{anime.title[0]}</span>
+                        <h1>{anime.title}</h1>
+                    </div>
+                    <h4>Genre:
+                        {#each anime.genre as genre}
+                            <!-- svelte-ignore a11y-missing-attribute -->
+                            <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
+                        {/each}
+                    </h4>
+                    <p>{@html anime.description}</p>
+                    <h4>Episodes:</h4>
+                    <ul>
+                        {#each Array(allowEp) as _, i}
+                            <li on:click={() => transitionStart("/anime/" + anime.slug + "/" + episodes[i].number)}>
+                                <div class="content">
+                                    <div style="position: relative;width: 100%; overflow: hidden;">
+                                        <img src="/images/play.png" alt="">
+                                        <img src={episodes[i].image} alt="">
+                                    </div>
+                                    <h5>Episode {episodes[i].number}</h5>
+                                </div>
+                                <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                            </li>
+                        {/each}
+                    </ul>
+                    {#if allowEp < episodes.length}
+                        <div class="show-btn"><button on:click={() => {allowMoreEp(anime)}}>Show more...</button></div>
                     {/if}
                 </div>
-            </div>
+                </div>
         </div>
-    </div>
-    <div class="bg-2">
-        <div class="container">
-            <div style="display: flex;">
-                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{anime.title[0]}</span>
-                <h1>{anime.title}</h1>
-            </div>
-            <h4>Genre:
-                {#each anime.genre as genre}
-                    <!-- svelte-ignore a11y-missing-attribute -->
-                    <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
-                {/each}
-            </h4>
-            <p>{@html anime.description}</p>
-            <h4>Episodes:</h4>
-            <ul>
-                {#each Array(allowEp) as _, i}
-                    <li on:click={() => transitionStart("/anime/" + anime.slug + "/" + episodes[i].number)}>
-                        <div class="content">
-                            <div style="position: relative;width: 100%; overflow: hidden;">
-                                <img src="/images/play.png" alt="">
-                                <img src={episodes[i].image} alt="">
-                            </div>
-                            <h5>Episode {episodes[i].number}</h5>
-                        </div>
-                        <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
-                    </li>
-                {/each}
-            </ul>
-            {#if allowEp < episodes.length}
-                <div class="show-btn"><button on:click={() => {allowMoreEp(anime)}}>Show more...</button></div>
-            {/if}
+        {/if}
+    </MediaQuery>
+    
+    <MediaQuery query="(max-width: 480px)" let:matches>
+        {#if matches}
+        <div class="root mobile">
+            mobile
         </div>
-    </div>
+        {/if}
+    </MediaQuery>
     {/await}
 </main>
 
 <style lang="scss"> 
     main {
         width: 100vw;
-        min-height: 100vh;
+        min-height: 90vh;
+        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.7),rgba(36, 36, 36, 0.9), rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.95),rgba(36, 36, 36, 0.95));
     }
     .bg-1 {
         width: 100vw;
-        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.7), rgba(36, 36, 36, 0.9), rgba(36, 36, 36, 0.95),rgba(36, 36, 36, 0.99));
     }
     .bg-2 {
         width: 100vw;
-        background: rgba(36, 36, 36, 0.99);
         padding-bottom: 4rem;
     }
     .container {
@@ -361,17 +434,10 @@
         display: grid;
         grid-template-columns: 2fr 5fr;
         column-gap: 1rem;
-        height: 50vh;
 
         .col-1 {
-            img {
-                &:nth-child(1) {
-                    z-index: 1;
-                }
-                &:nth-child(2) {
-                    z-index: 2;
-                }
-            }
+            width: 340px;
+            aspect-ratio: 68 / 93;
         }
         .col-2 {  
             position: relative;
@@ -507,5 +573,22 @@
     @keyframes FadeIn {
         from { opacity: 0;}
         to  {opacity: 1;}
+    }
+    .tablet {
+        .container {
+            width: 100%;
+            margin: auto;
+        }
+        .grid {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        .col-1 {
+            width: 280px;
+        }
+        .info {
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+        }
     }
 </style>

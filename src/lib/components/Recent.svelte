@@ -1,101 +1,96 @@
 <script>
-// @ts-nocheck
+	import { goto } from "$app/navigation";
+	import { THEME } from "$lib/stores";
+	import MediaQuery from "./MediaQuery.svelte";
 
-
-	import { goto } from '$app/navigation';
-	import { THEME } from '$lib/stores'; 
     /**
 	 * @type {number}
 	 */
     let currentTheme;
-    let recentAnimes = [];
+    /**
+	 * @type {number}
+	 */
+    let maxPage;
     /**
 	 * @type {number}
 	 */
     let page = 1;
     /**
-	 * @type {number}
+	 * @type {any[]}
 	 */
-    let maxPage;
+    let recentAnimeEpisodes = [];
 
     THEME.subscribe(value => {
         currentTheme = value;
     })
 
     /**
-    * @param {RequestInfo | URL | null} imgPath
-    */
-    function fixImgURL(imgPath) {
-        if(imgPath == null) {
-            return new Promise((resolve) => {
-                resolve(imgPath);
-            })
-        }
-        else {
-            return new Promise((resolve) => {
-                fetch(imgPath)
-                .then(response => response.blob())
-                .then(imageBlob => {
-                    resolve(URL.createObjectURL(imageBlob));
-                }); 
-            })
-        }
-    }
-
-    /**
 	 * @param {{ english: null; userPreferred: any; }} title
 	 */
-    function fixAnimeTitle(title) {
-        if(title.english == null) {
+     function fixAnimeTitle(title) {
+        console.log(title.hasOwnProperty('english'))
+        if(title.hasOwnProperty('english')) {
+            if(title.english != null) {
+                return new Promise((resolve) => {
+                    resolve(title.english);
+                })
+            }
+            else {
+                return new Promise((resolve) => {
+                    resolve(title.userPreferred);
+                })
+            }
+        }
+        else {
             return new Promise((resolve) => {
                 resolve(title.userPreferred);
             })
         }
-        else {
-            return new Promise((resolve) => {
-                resolve(title.english);
-            })
-        }
     }
-    
-    /**
-	 * @param {any} animes
+
+     /**
+	 * @param {any} animeEpisodes
 	 */
-    async function fixData(animes) {
-        for (const anime of animes) {
-            const newImgURL = await fixImgURL(anime.image);
-            const newAnimeTitle = await fixAnimeTitle(anime.anime.title);
-            if(anime.anime.description == null || anime.anime.description == "") {
-                anime.anime.description = "This anime does not have a description.";
+     async function fixData(animeEpisodes) {
+        for (const animeEpisode of animeEpisodes) {
+            const newAnimeTitle = await fixAnimeTitle(animeEpisode.anime.title);
+            if(animeEpisode.anime.description == null || animeEpisode.anime.description == "") {
+                animeEpisode.anime.description = "This anime does not have a description.";
             }
-            anime.image = newImgURL;
-            anime.anime.title = newAnimeTitle;
+            animeEpisode.anime.title = newAnimeTitle;
         }
-        return animes;
+        return animeEpisodes;
     }
-    /**
-	 * @param {string | number} page
-	 */
-    async function fetchRecent() {
-        console.log("Fetching Recent Animes");
-        const response = await fetch('https://api.enime.moe/recent?page=' + 1 + '&perPage=15');
+
+    async function fetchAnimesEpiodes() {
+        console.log("Fetching Searched Animes");
+        const response = await fetch('https://api.enime.moe/recent',{
+            method: "GET",
+            headers: {"Content-type": "application/json;charset=UTF-8"}
+        });
         const result = await response.json(); 
         maxPage = result.meta.lastPage;
-        const animes = await fixData(await result.data); 
-        recentAnimes = animes;
-        return recentAnimes;
+        const animeEpisodes = await fixData(await result.data);
+        console.log(animeEpisodes);
+        recentAnimeEpisodes = animeEpisodes;
+        return animeEpisodes;
     }
-    async function fetchMoreAnimes() {
+
+    async function fetchMoreAnimesEpiodes() {
         page++;
-        const response = await fetch('https://api.enime.moe/recent?page=' + page + '&perPage=15');
+        const response = await fetch("https://api.enime.moe/recent?page=" + page,{
+            method: "GET",
+            headers: {"Content-type": "application/json;charset=UTF-8"}
+        });
         const result = await response.json();
         const animes = await fixData(await result.data); 
-        recentAnimes = recentAnimes.concat(animes);
+        recentAnimeEpisodes = recentAnimeEpisodes.concat(animes);
+        console.log(page);
     }
     /**
 	 * @param {string | URL} path
 	 */
-    function transitionStart(path) {
+     function transitionStart(path) {
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 1;
         setTimeout(() => {
@@ -104,53 +99,74 @@
     }
 </script>
 
-<ul>
-    {#await fetchRecent()}
-    <!-- promise is pending -->
-{:then value}
-    {#each recentAnimes as anime}
-    <li>
-        <div class="item" class:back-light={currentTheme == 1}>
-            <div class="row-1">
-                <div on:click={() => transitionStart("/anime/"+ anime.anime.slug)} class="col-1">
-                    <img src="{anime.anime.coverImage}" alt="">
-                </div>
-                <div class="col-2">
-                    <div class="info">
-                        <h2 on:click={() => transitionStart("/anime/"+ anime.anime.slug)}><abbr title={anime.anime.title}>{anime.anime.title}</abbr></h2>
-                        <h4>Genre:
-                            {#each anime.anime.genre as genre}
-                                <!-- svelte-ignore a11y-missing-attribute -->
-                                <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
-                            {/each}
-                        </h4>
-                        <p>{@html anime.anime.description}</p>
-                    </div>
-                </div>
+<main>
+    {#await fetchAnimesEpiodes()}
+        <!-- promise is pending -->
+    {:then value}
+        <MediaQuery query="(min-width: 1281px)" let:matches>
+            {#if matches}
+            <ul>
+                {#each recentAnimeEpisodes as animeEpisode}
+                    <li on:click={() => {transitionStart("/anime/" + animeEpisode.anime.slug + "/" + animeEpisode.number)}}>
+                        <div class="item">
+                            <div class="cover"><img src={animeEpisode.anime.coverImage} alt=""></div>
+                            <h1>{animeEpisode.anime.title}</h1>
+                            <h2>Episode {animeEpisode.number}</h2>
+                        </div>
+                        <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                    </li>
+                {/each}
+            </ul>
+            {#if page < maxPage}
+                <div class="show-btn"><button on:click={() => {fetchMoreAnimesEpiodes()}}>Show more...</button></div>
+            {/if}
+            {/if}
+        </MediaQuery>
+        
+        <MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+            {#if matches}
+            <ul class="tablet">
+                {#each recentAnimeEpisodes as animeEpisode}
+                    <li on:click={() => {transitionStart("/anime/" + animeEpisode.anime.slug + "/" + animeEpisode.number)}}>
+                        <div class="item">
+                            <div class="cover"><img src={animeEpisode.anime.coverImage} alt=""></div>
+                            <h1>{animeEpisode.anime.title}</h1>
+                            <h2>Episode {animeEpisode.number}</h2>
+                        </div>
+                        <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                    </li>
+                {/each}
+            </ul>
+            {#if page < maxPage}
+                <div class="show-btn"><button on:click={() => {fetchMoreAnimesEpiodes()}}>Show more...</button></div>
+            {/if}
+            {/if}
+        </MediaQuery>
+        
+        <MediaQuery query="(max-width: 480px)" let:matches>
+            {#if matches}
+            <div class="root mobile">
+                mobile
             </div>
-            <div class="row-2">
-                <div on:click={() => transitionStart("/anime/"+ anime.anime.slug + "/" + anime.number)} class="thumbnail">
-                    {#if anime.image != null}
-                        <img class="video-img" src="{anime.image}" alt="Episode Thumbnail">
-                        <img class="play" src="/images/play.png" alt="">
-                    {:else}
-                        <img class="video-img" src="{anime.anime.coverImage}" alt="Episode Thumbnail">
-                        <img class="play" src="/images/play.png" alt="">
-                    {/if} 
-                </div>
-                <h3>Episode {anime.number}</h3>
-            </div>
-            <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
-        </div>
-    </li>
-    {/each}
-{/await}
-</ul>
-{#if page < maxPage}
-    <div class="show-btn"><button on:click={() => {fetchMoreAnimes()}}>Show more...</button></div>
-{/if}
+            {/if}
+        </MediaQuery> 
+    {/await}
+</main>
 
 <style lang="scss">
+    main {
+        padding-bottom: 2rem;
+    }
+    @keyframes popIn {
+        from { 
+            opacity: 0;
+            transform: scale(0);
+        }
+        to { 
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
     .show-btn {
         width: 100%;
         display: grid;
@@ -171,223 +187,90 @@
             }
         }
     }
-    $item-width: 170px; 
-    @keyframes popIn {
-        from { 
-            opacity: 0;
-            transform: scale(0);
-        }
-        to { 
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
     ul {
+        $item-width: 180px; 
         display: grid;
-        grid-template-columns: repeat(5, 1fr); 
+        grid-template-columns: repeat(auto-fill, minmax($item-width, 1fr));
+        place-items: center;
         column-gap: 1rem;
         row-gap: 1rem;
-        transition: 0.3s ease-out;
-        margin-bottom: 1.5rem;
-        z-index: 1;
-        position: relative;
+        padding-bottom: 1rem;
 
         li {
-            display: flex;
-            justify-content: center;
-        }
-
-        .item {
             position: relative;
-            width: $item-width;
-            transition: 0.3s ease-out;
+            clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
+            cursor: pointer;
+            -webkit-font-smoothing: subpixel-antialiased;
+            transition: 0.25s ease-in-out;
             animation: popIn;
             animation-duration: 0.8s;
             animation-timing-function: ease-in-out;
             animation-fill-mode: forwards;
-            opacity: 0;
 
             &:hover {
-                width: calc($item-width * 2.1);
-                
-                .row-1 {
-                    width: calc($item-width * 2.1);
-                }
-                .bg {
-                    width: calc(($item-width * 2.1) + 0.3rem);
-                    height: calc(206px * 2.22);
-                }
-                .row-2 .thumbnail {
-                    width: calc($item-width * 2);
-                    height: 200px;
-                    margin-bottom: 0.3rem;
-                    margin-top: 0.3rem;
+                img {
+                    filter: brightness(0.6);
+                    transform: scale(1.2);
                 }
             }
-
-            .row-1 {
-                background-color: $dark; 
-                display: flex;
-                clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), 100% 100%, 0 100%, 0% 1.5rem);
-                width: $item-width; 
-                height: 206px;
-                transition: 0.3s ease-out;
-                
-                .col-1 { 
-                    background-color: $dark; 
-                    width: $item-width;
-                    aspect-ratio: 7/8.5; 
-                    transition: 0.3s ease-out;
-                    cursor: pointer;
-
-                    img {
-                        display: block;
-                        clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
-                        width: $item-width;
-                        height: 206px;
-                        object-fit: cover;
-                    }
-                }
-
-                .col-2 {
-                    width: calc($item-width * 2.1);
-                    background-color: $dark;
-                    height: 206px;
-                    transition: 0.3s ease-out;
-
-                    .info {
-                        margin-left: 0.75rem;
-                    }
-
-                    h2 {
-                        letter-spacing: 1px;
-                        width: calc($item-width - 1rem);
-                        font-family: 'Noto Serif Georgian', sans-serif;
-                        font-size: 1.2rem;
-                        color: white;
-                        font-weight: 700;
-                        margin-top: 0.4rem;
-                        margin-bottom: 0.2rem;
-                        white-space: nowrap;
-                        text-overflow: ellipsis;
-                        overflow: hidden;
-                        cursor: pointer;
-                    }
-                    h4 {
-                        line-height: 1.2;
-                        width: calc($item-width - 1rem);
-                        font-family: 'Quicksand', sans-serif;
-                        font-size: 1rem;
-                        font-weight: normal;
-                        color: rgba(255, 255, 255, 0.9);
-                        display: -webkit-box;
-                        -webkit-line-clamp: 4;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden;
-
-                        a {
-                            transition: 0.15s ease-out;
-                            &::after {
-                                content: ",";
-                            }
-                            &:last-child {
-                                &::after {
-                                    content: "";
-                                }
-                            } 
-                        }
-                        .gold-genre {
-                            &:hover {
-                                color: $goldDark;
-                            }
-                        }
-                        .crimson-genre {
-                            &:hover {
-                                color: $crimsonDark;
-                                text-shadow: 0 0 1px $crimsonBright;
-                            }
-                        }
-                    }
-                    p {
-                        line-height: 1.2;
-                        margin-top: 0.3rem;
-                        width: calc($item-width - 1rem);
-                        font-family: 'Quicksand', sans-serif;
-                        font-size: 1rem;
-                        color: rgba(255, 255, 255, 0.6);
-                        display: -webkit-box;
-                        -webkit-line-clamp: 5;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden;
-                    }
-                }
+            .item {
+                margin: 0.15rem;
+                position: relative;
+                width: $item-width;
+                background-color: $dark;
+                clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
+                z-index: 1;
+                padding-bottom: 0.15rem;
             }
             
-            .row-2 {
-                display: grid;
-                grid-template-columns: 1fr;
-                background-color: $dark; 
-                padding: 0.3rem;
-                transform: translateY(-1px);
-                clip-path: polygon(0% 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
-                transition: 0.25s ease-out;
-                place-items: center;
-
-                .thumbnail {
-                    position: relative;
-                    width: 0;
-                    height: 0;
-                    transition: 0.3s ease-out;
-
-                    &:hover {
-                        cursor: pointer;
-                        .video-img {
-                            filter: brightness(0.6); 
-                        }
-                        .play {
-                            opacity: 1;
-                        }
-                    }
-                }
-                .video-img {
-                    display: block;
-                    width: 100%;
-                    height: 100%;
-                    transition: 0.3s ease-in-out;
-                    object-fit: cover;
-                    object-position: center;
-                }
-                .play {
-                    position: absolute;
-                    top: calc(50%);
-                    left: calc(50%);
-                    transform: translate(-50%, -50%);
-                    opacity: 0;
-                    width: 40px;
-                    user-select: none;
-                    transition: 0.3s ease-in-out;
-                }
-                h3 {
-                    padding: 0.1rem;
-                    padding-bottom: 0.2rem;
-                    font-family: 'Quicksand', sans-serif;
-                    font-size: 1.2rem;
-                    color: white;
-                    font-weight: normal;
-                    text-align: center;
-                }
+            .cover {
+                clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
+                width: 100%;
+                height: 206px;
+                overflow: hidden;
             }
-
+            img {
+                display: block;
+                height: 100%;
+                width: 100%;
+                object-fit: cover;
+                transition: 0.25s ease-in-out;
+            }
+            h1 {
+                letter-spacing: 1px;
+                margin: 0 1rem;
+                font-family: 'Quicksand', sans-serif;
+                font-weight: normal;
+                font-size: 0.95rem;
+                color: white;
+                font-weight: 500;
+                margin-top: 0.4rem;
+                margin-bottom: 0.2rem;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                text-align: center;
+                cursor: pointer;
+            }
+            h2 {
+                padding: 0.1rem;
+                padding-bottom: 0.2rem;
+                font-family: 'Quicksand', sans-serif;
+                font-size: 0.9rem;
+                color: white;
+                text-align: center;
+                font-weight: 400;
+            }
             .bg {
                 background-size: cover;
                 clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
                 position: absolute;
-                top: 0;
-                transform: translate(-0.15rem, -0.15rem);
-                width: calc($item-width + 0.3rem);
-                height: calc(($item-width * 10/7) + 0.325rem);
-                background-color: red;
-                z-index: -1;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: calc(100% + 0.25rem);
+                height:calc(100% + 0.25rem);
+                z-index: 0;
                 transition: 0.3s ease-out;
             }
             .gold {
@@ -397,12 +280,8 @@
                 background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);   
             }
         }
-        .back-light {
-            filter: drop-shadow(0 0 4px $crimsonDark);
-
-            &:hover {
-                filter: drop-shadow(0 0 8px $crimsonBright);
-            }
-        }
+    }
+    .tablet {
+        $item-width: 100px;
     }
 </style>

@@ -1,6 +1,7 @@
 <script>
 	import { goto } from "$app/navigation";
 	import { THEME } from "$lib/stores";
+	import MediaQuery from "./MediaQuery.svelte";
     /**
 	 * @type {number}
 	 */
@@ -9,7 +10,7 @@
     /**
 	 * @type { any }
 	 */
-    export let currentEpisode;
+    export let currentEpObj;
     /**
 	 * @type { any }
 	 */
@@ -24,6 +25,7 @@
 	 */
      async function fetchVideoPlayer(id) {
         return new Promise((resolve) => {
+            console.log(id)
             fetch('https://api.enime.moe/source/' + id)
             .then(res => res.json())
             .then(result => {
@@ -71,47 +73,108 @@
 </script>
 
 <section class="video-section">
-    <div class="container">
-        {#if anime.episodes[currentEpisode - 1].title == null}
-            <h1>Ep <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{currentEpisode}</span></h1>
-        {:else}
-        <h1>Ep <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{currentEpisode}</span> : "{anime.episodes[currentEpisode - 1].title}"</h1>
-        {/if}
-    </div>
-    {#await fetchVideos(anime.episodes[currentEpisode - 1].sources)}
+    {#await fetchVideos(currentEpObj.sources)}
         <!-- promise is pending -->
     {:then videoPlayers}
-        <div class="container video-player">
-            {#each videoPlayers as video, i}
-                {#if currentSource == i}
-                    <iframe scrolling="no" title="video-player" src={video} frameborder="0" allowfullscreen></iframe>
-                {/if}
-            {/each}
-            <div class="controls">
-                <ul>
-                    {#each anime.episodes[currentEpisode - 1].sources as source, i}
-                        <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                            <button on:click={() => currentSource = i}>Source {i + 1}</button>
-                            <div class="bg"></div>
-                        </li>
+        <MediaQuery query="(min-width: 1281px)" let:matches>
+            {#if matches}
+            <div>
+                <div class="container">
+                    {#if currentEpObj.title == null}
+                        <h1>Ep <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{currentEpObj.number}</span></h1>
+                    {:else}
+                    <h1>Ep <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{currentEpObj.number}</span> : "{currentEpObj.title}"</h1>
+                    {/if}
+                </div>
+                <div class="container video-player">
+                    {#each videoPlayers as video, i}
+                        {#if currentSource == i}
+                            <iframe scrolling="no" title="video-player" src={video} frameborder="0" allowfullscreen></iframe>
+                        {/if}
                     {/each}
-                </ul>
-                <ul>
-                    {#if parseInt(currentEpisode) - 1 > 0}
-                    <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                        <button on:click={() => {transitionStart('/anime/' + anime.slug + "/" + (parseInt(currentEpisode) - 1))}}>Prev</button>
-                        <div class="bg"></div>
-                    </li>
-                    {/if}
-                    {#if parseInt(currentEpisode) + 1 <= anime.episodes.length}
-                    <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                        <button on:click={() => {transitionStart('/anime/' + anime.slug + "/" + (parseInt(currentEpisode) + 1))}}>Next</button>
-                        <div class="bg"></div>
-                    </li>
-                    {/if}
-                </ul>
+                    <div class="controls">
+                        <ul>
+                            {#each currentEpObj.sources as source, i}
+                                <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                                    <button on:click={() => currentSource = i}>Source {i + 1}</button>
+                                    <div class="bg"></div>
+                                </li>
+                            {/each}
+                        </ul>
+                        <ul>
+                            {#if parseInt(currentEpObj.number) - 1 > 0}
+                            <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                                <button on:click={() => {transitionStart('/anime/' + anime.slug + "/" + (parseInt(currentEpObj.number) - 1))}}>Prev</button>
+                                <div class="bg"></div>
+                            </li>
+                            {/if}
+                            {#if parseInt(currentEpObj.number) + 1 <= anime.episodes.length}
+                            <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                                <button on:click={() => {transitionStart('/anime/' + anime.slug + "/" + (parseInt(currentEpObj.number) + 1))}}>Next</button>
+                                <div class="bg"></div>
+                            </li>
+                            {/if}
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>
+            {/if}
+        </MediaQuery>
+        
+        <MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+            {#if matches}
+            <div class="tablet">
+                <div class="container">
+                    {#if currentEpObj.title == null}
+                        <h1>Ep <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{currentEpObj.number}</span></h1>
+                    {:else}
+                    <h1>Ep <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{currentEpObj.number}</span> : "{currentEpObj.title}"</h1>
+                    {/if}
+                </div>
+                <div class="container">
+                    <div class="video-player">
+                        {#each videoPlayers as video, i}
+                            {#if currentSource == i}
+                                <iframe scrolling="no" title="video-player" src={video} frameborder="0" allowfullscreen></iframe>
+                            {/if}
+                        {/each}
+                        <div class="controls">
+                            <ul>
+                                {#each currentEpObj.sources as source, i}
+                                    <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                                        <button on:click={() => currentSource = i}>Source {i + 1}</button>
+                                        <div class="bg"></div>
+                                    </li>
+                                {/each}
+                            </ul>
+                            <ul>
+                                {#if parseInt(currentEpObj.number) - 1 > 0}
+                                <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                                    <button on:click={() => {transitionStart('/anime/' + anime.slug + "/" + (parseInt(currentEpObj.number) - 1))}}>Prev</button>
+                                    <div class="bg"></div>
+                                </li>
+                                {/if}
+                                {#if parseInt(currentEpObj.number) + 1 <= anime.episodes.length}
+                                <li class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                                    <button on:click={() => {transitionStart('/anime/' + anime.slug + "/" + (parseInt(currentEpObj.number) + 1))}}>Next</button>
+                                    <div class="bg"></div>
+                                </li>
+                                {/if}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/if}
+        </MediaQuery>
+        
+        <MediaQuery query="(max-width: 480px)" let:matches>
+            {#if matches}
+            <div class="root mobile">
+                mobile
+            </div>
+            {/if}
+        </MediaQuery>
     {/await}
 </section>
 
@@ -220,6 +283,20 @@
                 z-index: 0;
                 transition: 0.3s ease-out;
             }
+        }
+    }
+    .tablet {
+        .video-player {
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+        }
+        .container {
+            margin: auto;
+            width: 100%;
+        }
+        h1 {
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
         }
     }
 </style>

@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { THEME } from '$lib/stores';
 	import { onMount } from 'svelte';
+	import MediaQuery from './MediaQuery.svelte';
 
     /**
 	 * @type {number}
@@ -95,14 +96,28 @@
         return animes;
     }
     async function fetchPopular() {
-        console.log("Fetching Popular Animes");
-        const response = await fetch('https://api.enime.moe/popular');
-        const result = await response.json(); 
-        slidesAmount = result.data.length;
-        const animes = fixData(await result.data); 
-        loaded = true;
-        return animes;
-    }
+        console.time("Fetch Popular Animes");
+        let response;
+        try {
+            response = await fetch('https://api.enime.moe/popular',{
+                method: "GET",
+                headers: {"Content-type": "application/json;charset=UTF-8"}
+            });
+            const result = await response.json(); 
+            slidesAmount = result.data.length;
+            // @ts-ignore
+            const animes = fixData(await result.data);
+            loaded = true;
+            console.timeEnd("Fetch Popular Animes"); 
+            return animes;
+        }
+        catch {
+            console.timeEnd("Fetch Popular Animes");
+            console.error("CORS BLOCKED");
+            return false;
+        }
+    } 
+
     /**
 	 * @param {string | URL} path
 	 */
@@ -115,75 +130,149 @@
     }
 </script> 
 
-<main>
-    <!-- svelte-ignore empty-block -->
-    {#await fetchPopular()}
-    {:then popular_animes}
-    <div class="next-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => nextSlide()}>
-        <span class="material-symbols-outlined">
-        arrow_forward_ios
-        </span>
-    </div>
-    <div class="last-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => lastSlide()}>
-        <span class="material-symbols-outlined">
-        arrow_back_ios
-        </span>
-    </div>
-    <div id="carousel" class:back-light={currentTheme == 1}> 
-        <div class="slide" style={
-            "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[popular_animes.length - 1].bannerImage + "');" +
-            "background-size: cover;" + 
-            "background-position: center;"            
-            }>
-            <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                {#each popular_animes[popular_animes.length - 1].genre as genre}
-                    <span>{genre}</span>
-                {/each}
-            </h3>
-            <h2>{popular_animes[popular_animes.length - 1].title}</h2>
+<MediaQuery query="(min-width: 1281px)" let:matches>
+	{#if matches}
+	<main>
+        <!-- svelte-ignore empty-block -->
+        {#await fetchPopular()}
+        {:then popularAnimes}
+        <div class="next-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => nextSlide()}>
+            <span class="material-symbols-outlined">
+            arrow_forward_ios
+            </span>
         </div>
-        {#each popular_animes as anime, i}
-        <div on:click={() => transitionStart('/anime/' + anime.slug)} class="slide" class:active={slide == i} style={
-            "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.bannerImage + "');" +
-            "background-size: cover;" + 
-            "background-position: center;"            
-            }>
-            <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                {#each anime.genre as genre}
-                    <span>{genre}</span>
-                {/each}
-            </h3>
-            <h2>{anime.title}</h2>
+        <div class="last-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => lastSlide()}>
+            <span class="material-symbols-outlined">
+            arrow_back_ios
+            </span>
         </div>
-        {/each}
-        <div class="slide" style={
-            "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popular_animes[0].bannerImage + "');" +
-            "background-size: cover;" + 
-            "background-position: center;"            
-            }>
-            <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
-                {#each popular_animes[0].genre as genre}
-                    <span>{genre}</span>
-                {/each}
-            </h3>
-            <h2>{popular_animes[0].title}</h2>
+        <div id="carousel"> 
+            <div class="slide" style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popularAnimes[popularAnimes.length - 1].bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each popularAnimes[popularAnimes.length - 1].genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{popularAnimes[popularAnimes.length - 1].title}</h2>
+            </div>
+            {#each popularAnimes as anime, i}
+            <div on:click={() => transitionStart('/anime/' + anime.slug)} class="slide" class:active={slide == i} style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each anime.genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{anime.title}</h2>
+            </div>
+            {/each}
+            <div class="slide" style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popularAnimes[0].bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each popularAnimes[0].genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{popularAnimes[0].title}</h2>
+            </div>
         </div>
-    </div>
-    {/await}
-</main>
+        {/await}
+    </main>
+	{/if}
+</MediaQuery>
+
+<MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+	{#if matches}
+	<main class="tablet">
+        <!-- svelte-ignore empty-block -->
+        {#await fetchPopular()}
+        {:then popularAnimes}
+        <div class="next-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => nextSlide()}>
+            <span class="material-symbols-outlined">
+            arrow_forward_ios
+            </span>
+        </div>
+        <div class="last-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => lastSlide()}>
+            <span class="material-symbols-outlined">
+            arrow_back_ios
+            </span>
+        </div>
+        <div id="carousel"> 
+            <div class="slide" style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popularAnimes[popularAnimes.length - 1].bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each popularAnimes[popularAnimes.length - 1].genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{popularAnimes[popularAnimes.length - 1].title}</h2>
+            </div>
+            {#each popularAnimes as anime, i}
+            <div on:click={() => transitionStart('/anime/' + anime.slug)} class="slide" class:active={slide == i} style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each anime.genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{anime.title}</h2>
+            </div>
+            {/each}
+            <div class="slide" style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popularAnimes[0].bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each popularAnimes[0].genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{popularAnimes[0].title}</h2>
+            </div>
+        </div>
+        {/await}
+    </main>
+	{/if}
+</MediaQuery>
+
+<MediaQuery query="(max-width: 480px)" let:matches>
+	{#if matches}
+	<div class="root mobile">
+		mobile
+	</div>
+	{/if}
+</MediaQuery>
 
 <style lang="scss">
     main {
+        padding: 5rem 0;
         width: 100vw;
-        height: 45vh;
+        height: 300px;
         overflow: hidden;
         display: grid;
         place-items: center;
         position: relative;
-        background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0.1), rgba(36, 36, 36, 0.1));
+        background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0.95));
     }
     #carousel {
-        width: 30vw;
+        width: 500px;
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
@@ -331,5 +420,28 @@
         margin: 5vh 5vw;
         opacity: 1;
         pointer-events: auto;
+    }
+    main.tablet {
+        padding: 2rem 0;
+        height: 300px; 
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            font-size: 0.9rem;
+        }
+
+        #carousel {
+            width: 40vw;
+        }
+        
+        .next-btn {
+            right: 10%;
+        }
+        .last-btn {
+            left: 10%;
+        }
     }
 </style>

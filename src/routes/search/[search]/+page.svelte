@@ -1,4 +1,5 @@
 <script>
+	import MediaQuery from '$lib/components/MediaQuery.svelte';
 	import SearchResults from '$lib/components/SearchResults.svelte';
 import { THEME } from '$lib/stores';
 	import { onMount } from 'svelte';
@@ -36,23 +37,59 @@ import { THEME } from '$lib/stores';
     }
 </script>
 
-<main>
-    <div class="container">
-        <form on:submit|preventDefault={() => {searchedAnime = searchValue.value;}}>
-            <span class="material-symbols-outlined search-icon">
-                search
-            </span>
-            <input on:keydown={searchAnime} bind:this={searchValue} type="text" placeholder="Search Anime...">
-        </form>
-        <SearchResults searchedName={searchedAnime}/>
-    </div>
-</main>
+<MediaQuery query="(min-width: 1281px)" let:matches>
+	{#if matches}
+	<main>
+        <div class="container">
+            <form on:submit|preventDefault={() => {searchedAnime = searchValue.value;}}>
+                <span class="material-symbols-outlined search-icon">
+                    search
+                </span>
+                <input on:keydown={searchAnime} bind:this={searchValue} type="text" placeholder="Search Anime...">
+            </form>
+            <SearchResults searchedName={searchedAnime}/>
+        </div>
+    </main>
+	{/if}
+</MediaQuery>
+
+<MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+	{#if matches}
+	<main class="tablet">
+        <div class="container">
+            <form on:submit|preventDefault={() => {searchedAnime = searchValue.value;}}>
+                <span class="material-symbols-outlined search-icon">
+                    search
+                </span>
+                <input on:keydown={searchAnime} bind:this={searchValue} type="text" placeholder="Search Anime...">
+            </form>
+            <SearchResults searchedName={searchedAnime}/>
+        </div>
+    </main>
+	{/if}
+</MediaQuery>
+
+<MediaQuery query="(max-width: 480px)" let:matches>
+	{#if matches}
+	<main>
+        <div class="container">
+            <form on:submit|preventDefault={() => {searchedAnime = searchValue.value;}}>
+                <span class="material-symbols-outlined search-icon">
+                    search
+                </span>
+                <input on:keydown={searchAnime} bind:this={searchValue} type="text" placeholder="Search Anime...">
+            </form>
+            <SearchResults searchedName={searchedAnime}/>
+        </div>
+    </main>
+	{/if}
+</MediaQuery>
 
 <style lang="scss">
     main {
         width: 100vw;
         min-height: 110vh;
-        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.8),rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.99), rgba(36, 36, 36, 0.99),rgba(36, 36, 36, 0.99));
+        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.8),rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.95),rgba(36, 36, 36, 0.95));
     }
     .container {
         margin: auto 18%;
@@ -95,6 +132,17 @@ import { THEME } from '$lib/stores';
             &:focus {
                 outline: none;
             }
+        }
+    }
+    main.tablet {
+
+        .container { 
+            width: calc(100vw - 2rem);
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.6rem;
         }
     }
 </style>

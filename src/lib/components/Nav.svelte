@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
     import { THEME } from '../stores';
 	import BgVideo from './BgVideo.svelte';
+	import MediaQuery from './MediaQuery.svelte';
 	import SearchBar from './SearchBar.svelte';
 
     /**
@@ -66,40 +67,91 @@
     }
 </script>
 
+
+
 <main>  
     <BgVideo/>
-    <nav>
-        <h1 on:click={() => goHome()}>
-            <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
-            <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
-        </h1>
-        <div style="display: flex;">
-            <SearchBar/>
-            <section>
-                <div class="theme" class:active={currentTheme == 0}>
-                    <div on:click={() => {setTheme(0)}} id="gold"></div>
-                </div>
-                <div class="line"></div>
-                <div class="theme" class:active={currentTheme == 1}>
-                    <div on:click={() => {setTheme(1)}} id="crimson"></div>
-                </div>
-            </section>
-        </div>
-    </nav>
+    <MediaQuery query="(min-width: 1281px)" let:matches>
+        {#if matches}
+        <nav>
+            <h1 on:click={() => goHome()}>
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
+            </h1>
+            <div style="display: flex;">
+                <SearchBar/>
+                <section>
+                    <div class="theme" class:active={currentTheme == 0}>
+                        <div on:click={() => {setTheme(0)}} id="gold"></div>
+                    </div>
+                    <div class="line"></div>
+                    <div class="theme" class:active={currentTheme == 1}>
+                        <div on:click={() => {setTheme(1)}} id="crimson"></div>
+                    </div>
+                </section>
+            </div>
+        </nav>
+        {/if}
+    </MediaQuery>
+    
+    <MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+        {#if matches}
+        <nav class="tablet">
+            <h1 on:click={() => goHome()}>
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
+            </h1>
+            <div style="display: flex;">
+                <SearchBar/>
+                <section>
+                    <div class="theme" class:active={currentTheme == 0}>
+                        <div on:click={() => {setTheme(0)}} id="gold"></div>
+                    </div>
+                    <div class="line"></div>
+                    <div class="theme" class:active={currentTheme == 1}>
+                        <div on:click={() => {setTheme(1)}} id="crimson"></div>
+                    </div>
+                </section>
+            </div>
+        </nav>
+        {/if}
+    </MediaQuery>
+    
+    <MediaQuery query="(max-width: 480px)" let:matches>
+        {#if matches}
+        <nav class="mobile">
+            <h1 on:click={() => goHome()}>
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>K</span>ing  
+                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>A</span>nime
+            </h1>
+            <div style="display: grid; place-items: center;">
+                <section>
+                    <div class="theme" class:active={currentTheme == 0}>
+                        <div on:click={() => {setTheme(0)}} id="gold"></div>
+                    </div>
+                    <div class="line"></div>
+                    <div class="theme" class:active={currentTheme == 1}>
+                        <div on:click={() => {setTheme(1)}} id="crimson"></div>
+                    </div>
+                </section>
+                <SearchBar/>
+            </div>
+        </nav>
+        {/if}
+    </MediaQuery>
 </main>
 
 <style lang="scss"> 
     main {
         width: 100vw;
-        background: linear-gradient(rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.3),rgba(36, 36, 36, 0));
     }
     nav {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding-top: 1rem;
-        margin-left: 18%;
-        margin-right: 18%;
+        padding-left: 18%;
+        padding-right: 18%;
 
         h1 {
             user-select: none;
@@ -189,5 +241,32 @@
         width: 20px;
         height: 3px;
         background-color: rgb(36, 36, 36);
+    }
+    nav.tablet {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+
+        .line {
+            width: 10px;
+            height: 3px;
+            background-color: rgb(36, 36, 36);
+        }
+    }
+    nav.mobile {
+        width: calc(100% - 1rem);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+        row-gap: 1rem;
+        padding: 0;
+
+        h1 {
+            padding-top: 1rem;
+        }
+
+        section {
+            margin: 0;
+        }
     }
 </style>

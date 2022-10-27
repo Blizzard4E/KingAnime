@@ -1,5 +1,6 @@
 <script>
 	import { goto } from "$app/navigation";
+	import MediaQuery from "./MediaQuery.svelte";
 
 
     let anime = "";
@@ -16,12 +17,38 @@
     }
 </script>
 
-<form on:submit|preventDefault={() => transitionStart("/search/" + anime)}>
-    <input bind:value={anime} type="text" placeholder="Search anime...">
-    <span class="material-symbols-outlined search-icon">
-    search
-    </span>
-</form>
+<MediaQuery query="(min-width: 1281px)" let:matches>
+	{#if matches}
+	<form on:submit|preventDefault={() => transitionStart("/search/" + anime)}>
+        <input bind:value={anime} type="text" placeholder="Search anime...">
+        <span class="material-symbols-outlined search-icon">
+        search
+        </span>
+    </form>
+	{/if}
+</MediaQuery>
+
+<MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+	{#if matches}
+	<form class="tablet" on:submit|preventDefault={() => transitionStart("/search/" + anime)}>
+        <input bind:value={anime} type="text" placeholder="Search anime...">
+        <span class="material-symbols-outlined search-icon">
+        search
+        </span>
+    </form>
+	{/if}
+</MediaQuery>
+
+<MediaQuery query="(max-width: 480px)" let:matches>
+	{#if matches}
+	<form class="mobile" on:submit|preventDefault={() => transitionStart("/search/" + anime)}>
+        <input bind:value={anime} type="text" placeholder="Search anime...">
+        <span class="material-symbols-outlined search-icon">
+        search
+        </span>
+    </form>
+	{/if}
+</MediaQuery>
 
 <style lang="scss">
     form {
@@ -61,5 +88,12 @@
                 outline: none;
             }
         }
+    }
+    form.tablet {
+        width: 200px;
+    }
+    form.mobile {
+        margin-top: 1rem;
+        width: 300px;
     }
 </style>

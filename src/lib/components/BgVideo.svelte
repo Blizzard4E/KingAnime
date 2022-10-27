@@ -21,12 +21,13 @@
 
 <style lang="scss">
     video {
-        width: 100%;
+        width: 100vw;
         height: 100vh;
         object-fit: cover;
-        object-position: left top;
+        object-position: center;
         position: fixed;
         z-index: -2;
+        filter: brightness(0.6);
     }
     .bg {
         position: fixed;

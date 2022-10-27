@@ -1,5 +1,6 @@
 <script>
     import BgVideo from '$lib/components/BgVideo.svelte';
+	import MediaQuery from '$lib/components/MediaQuery.svelte';
     import Nav from '$lib/components/Nav.svelte';
     import Popular from '$lib/components/Popular.svelte';
     import Recent from '$lib/components/Recent.svelte';
@@ -36,32 +37,71 @@
     }
 </script>
 
-<main>
-    <Popular/>
-    <div class="container">
-        <div class="grid">
-            <h1 on:click={resetPage}><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>R</span>ecent</h1>
-        </div>
-    </div>
-    <div class="container" style="padding-bottom: 2rem">
-        <div class="grid">
-            <Recent/>
-        </div>
-    </div> 
-</main>
 
-<style lang="scss" scoped> 
+<MediaQuery query="(min-width: 1281px)" let:matches>
+    {#if matches}
+    <Popular/>
+    <main>
+        <div class="recent">
+            <div class="container">
+                <div class="grid">
+                    <h1 on:click={resetPage}><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>R</span>ecent</h1>
+                </div>
+            </div>
+            <div class="container" style="padding-bottom: 2rem">
+                <div class="grid">
+                    <Recent/>
+                </div>
+            </div> 
+        </div>
+    </main>
+    {/if}
+</MediaQuery>
+
+<MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+    {#if matches}
+    <main class="tablet">
+        <Popular/>
+        <div class="recent">
+            <div class="container">
+                <div class="grid">
+                    <h1 on:click={resetPage}><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>R</span>ecent</h1>
+                </div>
+            </div>
+            <div class="container" style="padding-bottom: 2rem">
+                <div class="grid">
+                    <Recent/>
+                </div>
+            </div> 
+        </div>
+    </main>
+    {/if}
+</MediaQuery>
+
+<MediaQuery query="(max-width: 480px)" let:matches>
+    {#if matches}
+    <main class="mobile">
+        <Popular/>
+        <div class="root mobile">
+            mobile
+        </div>
+    </main>
+    {/if}
+</MediaQuery>
+
+<style lang="scss" scoped>
+    .recent {
+        background: rgba(36, 36, 36, 0.95);
+    }
     main {
-        padding-top: 35vh;
         width: 100vw;
-        min-height: 110vh; 
-        background: linear-gradient(rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.95), rgba(36, 36, 36, 0.96),rgba(36, 36, 36, 0.99));
+        min-height: 110vh;
     }
     h1 {
         cursor: pointer;
         user-select: none;
         font-family: 'Fandango Bold', sans-serif;
-        font-size: 2.5rem;
+        font-size: 2rem;
         margin-bottom: 1rem;
         color: white;
         font-weight: normal;
@@ -154,6 +194,16 @@
         }
         button.next {
             transform: translateX(1rem);
+        }
+    }
+    main.tablet {
+
+        .grid { 
+            width: calc(100vw - 2rem);
+        }
+
+        h1 {
+            font-size: 1.6rem;
         }
     }
 </style>

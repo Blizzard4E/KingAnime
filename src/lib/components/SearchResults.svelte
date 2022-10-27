@@ -1,6 +1,7 @@
 <script>
 	import { goto } from "$app/navigation";
 	import { THEME } from "$lib/stores";
+	import MediaQuery from "./MediaQuery.svelte";
 
     /**
 	 * @type {number}
@@ -63,7 +64,10 @@
     async function fetchAnimes(name) {
         if(name == "") return [];
         console.log("Fetching Searched Animes");
-        const response = await fetch('https://api.enime.moe/search/' + name);
+        const response = await fetch('https://api.enime.moe/search/' + name,{
+            method: "GET",
+            headers: {"Content-type": "application/json;charset=UTF-8"}
+        });
         const result = await response.json(); 
         maxPage = result.meta.lastPage;
         const animes = await fixData(await result.data);
@@ -74,7 +78,10 @@
 
     async function fetchMoreAnimes() {
         page++;
-        const response = await fetch('https://api.enime.moe/search/' + searchedName + "?page=" + page);
+        const response = await fetch('https://api.enime.moe/search/' + searchedName + "?page=" + page,{
+            method: "GET",
+            headers: {"Content-type": "application/json;charset=UTF-8"}
+        });
         const result = await response.json();
         const animes = await fixData(await result.data); 
         searchedAnimes = searchedAnimes.concat(animes);
@@ -96,6 +103,8 @@
     {#await fetchAnimes(searchedName)}
         <!-- promise is pending -->
     {:then value}
+    <MediaQuery query="(min-width: 1281px)" let:matches>
+        {#if matches}
         <ul>
             {#each searchedAnimes as anime}
                 <li on:click={() => {transitionStart("/anime/" + anime.slug)}}>
@@ -116,6 +125,58 @@
         {#if page < maxPage}
             <div class="show-btn"><button on:click={() => {fetchMoreAnimes()}}>Show more...</button></div>
         {/if}
+        {/if}
+    </MediaQuery>
+    
+    <MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
+        {#if matches}
+        <ul>
+            {#each searchedAnimes as anime}
+                <li on:click={() => {transitionStart("/anime/" + anime.slug)}}>
+                    <div class="item">
+                        <div class="cover"><img src={anime.coverImage} alt=""></div>
+                        <h1>{anime.title}</h1>
+                        <h2>{anime.status}</h2>
+                        {#if anime.currentEpisode > 1}
+                            <h2>{anime.currentEpisode} Episodes</h2>
+                        {:else}
+                            <h2>{anime.currentEpisode} Episode</h2>
+                        {/if}
+                    </div>
+                    <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                </li>
+            {/each}
+        </ul>
+        {#if page < maxPage}
+            <div class="show-btn"><button on:click={() => {fetchMoreAnimes()}}>Show more...</button></div>
+        {/if}
+        {/if}
+    </MediaQuery>
+    
+    <MediaQuery query="(max-width: 480px)" let:matches>
+        {#if matches}
+        <ul class="tablet">
+            {#each searchedAnimes as anime}
+                <li on:click={() => {transitionStart("/anime/" + anime.slug)}}>
+                    <div class="item">
+                        <div class="cover"><img src={anime.coverImage} alt=""></div>
+                        <h1>{anime.title}</h1>
+                        <h2>{anime.status}</h2>
+                        {#if anime.currentEpisode > 1}
+                            <h2>{anime.currentEpisode} Episodes</h2>
+                        {:else}
+                            <h2>{anime.currentEpisode} Episode</h2>
+                        {/if}
+                    </div>
+                    <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                </li>
+            {/each}
+        </ul>
+        {#if page < maxPage}
+            <div class="show-btn"><button on:click={() => {fetchMoreAnimes()}}>Show more...</button></div>
+        {/if}
+        {/if}
+    </MediaQuery>
     {/await}
 </main>
 
@@ -144,15 +205,15 @@
         }
     }
     ul {
+        $item-width: 180px; 
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax($item-width, 1fr));
         place-items: center;
         row-gap: 1rem;
         padding-top: 2rem;
         padding-bottom: 1rem;
 
         li {
-            $item-width: 180px; 
             position: relative;
             clip-path: polygon(1.5rem 0%, 100% 0, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 0 100%, 0% 1.5rem);
             cursor: pointer;
@@ -193,7 +254,7 @@
                 margin: 0 1rem;
                 font-family: 'Noto Serif Georgian', sans-serif;
                 font-weight: normal;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 color: white;
                 font-weight: 700;
                 margin-top: 0.4rem;
@@ -231,6 +292,16 @@
             .crimson {
                 background: linear-gradient($crimsonDark, $crimsonDark, $crimsonBright, $crimsonDark, $crimsonDark);   
             }
+        }
+    }
+    .tablet {
+        $item-width: 100px;
+        .grid { 
+            width: calc(90vw - 1.5rem);
+        }
+
+        h1 {
+            font-size: 1.6rem;
         }
     }
 </style>
