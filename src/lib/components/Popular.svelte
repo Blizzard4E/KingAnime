@@ -500,7 +500,7 @@
     }
     main.mobile {
         padding: 2rem 0;
-        height: 60vw; 
+        height: 65vw; 
 
         h2 {
             font-size: 1.5rem;
