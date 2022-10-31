@@ -254,9 +254,62 @@
 
 <MediaQuery query="(max-width: 480px)" let:matches>
 	{#if matches}
-	<div class="root mobile">
-		mobile
-	</div>
+	<main class="mobile">
+        <!-- svelte-ignore empty-block -->
+        {#await fetchPopular()}
+        {:then popularAnimes}
+        <div class="next-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => nextSlide()}>
+            <span class="material-symbols-outlined">
+            arrow_forward_ios
+            </span>
+        </div>
+        <div class="last-btn" class:gold={currentTheme == 0} class:crimson={currentTheme == 1} on:click={() => lastSlide()}>
+            <span class="material-symbols-outlined">
+            arrow_back_ios
+            </span>
+        </div>
+        <div id="carousel"> 
+            <div class="slide" style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popularAnimes[popularAnimes.length - 1].bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each popularAnimes[popularAnimes.length - 1].genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{popularAnimes[popularAnimes.length - 1].title}</h2>
+            </div>
+            {#each popularAnimes as anime, i}
+            <div on:click={() => transitionStart('/anime/' + anime.slug)} class="slide" class:active={slide == i} style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + anime.bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each anime.genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{anime.title}</h2>
+            </div>
+            {/each}
+            <div class="slide" style={
+                "background: linear-gradient(rgba(36, 36, 36, 0), rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.4), rgba(36, 36, 36, 0.7)), url('" + popularAnimes[0].bannerImage + "');" +
+                "background-size: cover;" + 
+                "background-position: center;"            
+                }>
+                <h3 class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>
+                    {#each popularAnimes[0].genre as genre}
+                        <span>{genre}</span>
+                    {/each}
+                </h3>
+                <h2>{popularAnimes[0].title}</h2>
+            </div>
+        </div>
+        {/await}
+    </main>
 	{/if}
 </MediaQuery>
 
@@ -420,6 +473,7 @@
         margin: 5vh 5vw;
         opacity: 1;
         pointer-events: auto;
+        z-index: 1;
     }
     main.tablet {
         padding: 2rem 0;
@@ -442,6 +496,67 @@
         }
         .last-btn {
             left: 10%;
+        }
+    }
+    main.mobile {
+        padding: 2rem 0;
+        height: 60vw; 
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            font-size: 0.9rem;
+        }
+
+        #carousel {
+            width: 70vw;
+        }
+        
+        .next-btn {
+            right: 10%;
+        }
+        .last-btn {
+            left: 10%;
+        }
+    }
+    main.mobile {
+        padding: 2rem 0;
+        height: 60vw; 
+
+        h2 {
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            font-size: 0.9rem;
+        }
+
+        #carousel {
+            width: 70vw;
+        }
+        
+        .next-btn {
+            transform: scale(1);
+            right: 5%;
+        }
+        .last-btn {
+            transform: scale(1);
+            left: 5%;
+        }
+        .next-btn.gold, .last-btn.gold {
+            &:hover {
+                transform: scale(1.5);
+                color: $goldDark;
+            }
+        }
+        .next-btn.crimson, .last-btn.crimson {
+            &:hover {
+                transform: scale(1.5);
+                color: $crimsonBright;
+                text-shadow: 0 0 10px $crimsonDark;
+            }
         }
     }
 </style>

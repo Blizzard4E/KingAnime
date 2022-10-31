@@ -82,8 +82,17 @@
     {#if matches}
     <main class="mobile">
         <Popular/>
-        <div class="root mobile">
-            mobile
+        <div class="recent">
+            <div class="container">
+                <div class="grid">
+                    <h1 on:click={resetPage}><span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>R</span>ecent</h1>
+                </div>
+            </div>
+            <div class="container" style="padding-bottom: 2rem">
+                <div class="grid">
+                    <Recent/>
+                </div>
+            </div> 
         </div>
     </main>
     {/if}
@@ -204,6 +213,17 @@
 
         h1 {
             font-size: 1.6rem;
+        }
+    }
+    main.mobile {
+
+        .grid { 
+            width: calc(100vw - 2rem);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
         }
     }
 </style>

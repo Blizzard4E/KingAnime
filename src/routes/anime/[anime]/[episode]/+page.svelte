@@ -129,9 +129,26 @@
         
         <MediaQuery query="(max-width: 480px)" let:matches>
             {#if matches}
-            <div class="root mobile">
-                mobile
-            </div>
+            <section class="info-section mobile">
+                <div class="container">
+                    <div class="grid">
+                        <div class="cover" style={"background: radial-gradient(transparent, transparent, rgba(36, 36, 36, 0.3), rgba(36, 36, 36, 0.9)), url('" + anime.coverImage + "');" + "background-position: center;" + "background-size: cover; height: 180px;"}>
+                        </div>
+                        <div>
+                            <div style="display: flex;">
+                                <h2 on:click={() => transitionStart("/anime/" + anime.slug)}>{anime.title}</h2>
+                            </div>
+                            <h4>Genre:
+                                {#each anime.genre as genre}
+                                    <!-- svelte-ignore a11y-missing-attribute -->
+                                    <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
+                                {/each}
+                            </h4>
+                            <p>{@html anime.description}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
             {/if}
         </MediaQuery>
     {/await}
@@ -227,6 +244,26 @@
         .grid {
             margin-left: 1.5rem;
             margin-right: 1.5rem;
+        }
+    }
+    .mobile {
+        .container {            
+            margin: auto;
+            width: 100%;
+        }
+        .grid {
+            margin-left: 1rem;
+            margin-right: 1rem;         
+
+            .cover {
+                width: 120px;
+            }
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        h4, p {
+            font-size: 1rem;
         }
     }
 </style>

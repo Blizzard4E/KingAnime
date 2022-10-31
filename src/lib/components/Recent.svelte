@@ -145,9 +145,21 @@
         
         <MediaQuery query="(max-width: 480px)" let:matches>
             {#if matches}
-            <div class="root mobile">
-                mobile
-            </div>
+            <ul class="mobile">
+                {#each recentAnimeEpisodes as animeEpisode}
+                    <li on:click={() => {transitionStart("/anime/" + animeEpisode.anime.slug + "/" + animeEpisode.number)}}>
+                        <div class="item">
+                            <div class="cover"><img src={animeEpisode.anime.coverImage} alt=""></div>
+                            <h1>{animeEpisode.anime.title}</h1>
+                            <h2>Episode {animeEpisode.number}</h2>
+                        </div>
+                        <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                    </li>
+                {/each}
+            </ul>
+            {#if page < maxPage}
+                <div class="show-btn"><button on:click={() => {fetchMoreAnimesEpiodes()}}>Show more...</button></div>
+            {/if}
             {/if}
         </MediaQuery> 
     {/await}
@@ -283,5 +295,14 @@
     }
     .tablet {
         $item-width: 100px;
+    }
+    .mobile {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+        .item {
+            width: 140px;
+        }
+        .cover {
+            height: 170px;
+        }
     }
 </style>

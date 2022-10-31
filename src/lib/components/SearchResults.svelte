@@ -130,7 +130,7 @@
     
     <MediaQuery query="(min-width: 481px) and (max-width: 1280px)" let:matches>
         {#if matches}
-        <ul>
+        <ul class="tablet">
             {#each searchedAnimes as anime}
                 <li on:click={() => {transitionStart("/anime/" + anime.slug)}}>
                     <div class="item">
@@ -155,7 +155,7 @@
     
     <MediaQuery query="(max-width: 480px)" let:matches>
         {#if matches}
-        <ul class="tablet">
+        <ul class="mobile">
             {#each searchedAnimes as anime}
                 <li on:click={() => {transitionStart("/anime/" + anime.slug)}}>
                     <div class="item">
@@ -210,6 +210,7 @@
         grid-template-columns: repeat(auto-fill, minmax($item-width, 1fr));
         place-items: center;
         row-gap: 1rem;
+        column-gap: 1rem;
         padding-top: 2rem;
         padding-bottom: 1rem;
 
@@ -294,14 +295,21 @@
             }
         }
     }
-    .tablet {
-        $item-width: 100px;
-        .grid { 
-            width: calc(90vw - 1.5rem);
-        }
+    .mobile {
+        width: 100%;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
 
+        .item {
+            width: 140px;
+        }
+        .cover {
+            height: 170px;
+        }
         h1 {
-            font-size: 1.6rem;
+            font-size: 0.85rem;
+        }
+        h2 {
+            font-size: 0.85rem;
         }
     }
 </style>

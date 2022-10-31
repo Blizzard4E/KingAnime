@@ -23,7 +23,6 @@ import { THEME } from '$lib/stores';
         // @ts-ignore
         document.getElementById('transition-screen').style.opacity = 0;
         searchedAnime = data.search;
-        searchValue.value = data.search;
     });
     /**
 	 * @type {string | number | NodeJS.Timeout | undefined}
@@ -71,7 +70,7 @@ import { THEME } from '$lib/stores';
 
 <MediaQuery query="(max-width: 480px)" let:matches>
 	{#if matches}
-	<main>
+	<main class="mobile">
         <div class="container">
             <form on:submit|preventDefault={() => {searchedAnime = searchValue.value;}}>
                 <span class="material-symbols-outlined search-icon">
@@ -135,6 +134,17 @@ import { THEME } from '$lib/stores';
         }
     }
     main.tablet {
+
+        .container { 
+            width: calc(100vw - 2rem);
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+        }
+    }
+    main.mobile {
 
         .container { 
             width: calc(100vw - 2rem);

@@ -13,6 +13,10 @@
 	 * @type {number}
 	 */
     let currentTheme;
+    /**
+	 * @type { boolean }
+	 */
+     export let haveSearch;
 
     THEME.subscribe(value => {
         currentTheme = value;
@@ -134,7 +138,9 @@
                         <div on:click={() => {setTheme(1)}} id="crimson"></div>
                     </div>
                 </section>
-                <SearchBar/>
+                {#if haveSearch}
+                    <SearchBar/>
+                {/if}
             </div>
         </nav>
         {/if}

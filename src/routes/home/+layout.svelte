@@ -4,5 +4,5 @@
     import Nav from "$lib/components/Nav.svelte";
 
 </script>
-<BgVideo/>
+<Nav haveSearch={true}/>
 <slot></slot>

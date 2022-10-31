@@ -307,8 +307,62 @@
     
     <MediaQuery query="(max-width: 480px)" let:matches>
         {#if matches}
-        <div class="root mobile">
-            mobile
+        <div class="bg-1 mobile">
+            <div class="container">
+                <div class="grid">
+                    <div class="info-section">
+                        <div class="cover" style={"background: radial-gradient(transparent, transparent, rgba(36, 36, 36, 0.3), rgba(36, 36, 36, 0.9)), url('" + anime.coverImage + "');" + "background-position: center;" + "background-size: cover; height: 260px;"}>
+                        </div>
+                        <div>
+                            <div style="display: flex;">
+                                <span class:gold={currentTheme == 0} class:crimson={currentTheme == 1}>{anime.title[0]}</span>
+                                <h1>{anime.title}</h1>
+                            </div>
+                            <h4>Genre:
+                                {#each anime.genre as genre}
+                                    <!-- svelte-ignore a11y-missing-attribute -->
+                                    <a class:gold-genre={currentTheme == 0} class:crimson-genre={currentTheme == 1}>{" " + genre}</a>
+                                {/each}
+                            </h4>
+                            <p>{@html anime.description}</p>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        {#if haveKitsu}
+                            <img bind:this={playButton} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="play" src="/images/play.png" alt="">
+                            <img bind:this={thumbnail} on:mouseenter={() => playTrailer()} on:click={() => playTrailer()} class="thumbnail" src={"https://i.ytimg.com/vi/" + anime.youtubeID + "/maxresdefault.jpg"} alt="">
+                            <iframe src={'https://www.youtube.com/embed/' + anime.youtubeID} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                            </iframe>
+                        {:else}
+                            <img class="thumbnail" src={anime.coverImage} alt="">
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-2 mobile">
+            <div class="container">
+                <div class="info">
+                    <h4>Episodes:</h4>
+                    <ul>
+                        {#each Array(allowEp) as _, i}
+                            <li on:click={() => transitionStart("/anime/" + anime.slug + "/" + episodes[i].number)}>
+                                <div class="content">
+                                    <div style="position: relative;width: 100%; overflow: hidden;">
+                                        <img src="/images/play.png" alt="">
+                                        <img src={episodes[i].image} alt="">
+                                    </div>
+                                    <h5>Episode {episodes[i].number}</h5>
+                                </div>
+                                <div class="bg" class:gold={currentTheme == 0} class:crimson={currentTheme == 1}></div>
+                            </li>
+                        {/each}
+                    </ul>
+                    {#if allowEp < episodes.length}
+                        <div class="show-btn"><button on:click={() => {allowMoreEp(anime)}}>Show more...</button></div>
+                    {/if}
+                </div>
+                </div>
         </div>
         {/if}
     </MediaQuery>
@@ -589,6 +643,100 @@
         .info {
             margin-left: 1.5rem;
             margin-right: 1.5rem;
+        }
+    }
+    .mobile {
+        .container {
+            width: 100%;
+            margin: auto;
+        }
+        .grid {
+            grid-template-columns: 1fr;
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        .col-2 {
+            aspect-ratio: 16/9;
+        }
+        .info {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+        ul {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            column-gap: 1rem;
+
+            .cover {
+                width: 180px;
+                aspect-ratio: 9 / 13;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            span {
+                font-size: 1.3rem;
+            }
+            h2 {
+                font-family: 'Noto Serif Georgian', sans-serif;
+                font-size: 1.3rem;
+                line-height: 1;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            h4 {
+                line-height: 1.1;
+                font-family: 'Quicksand', sans-serif;
+                font-size: 1rem;
+                font-weight: normal;
+                color: rgba(255, 255, 255, 0.9);
+                display: -webkit-box;
+                -webkit-line-clamp: 4;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin: 0.5rem 0;
+
+                a {
+                    transition: 0.15s ease-out;
+                    cursor: pointer;
+                    &::after {
+                        content: ",";
+                    }
+                    &:last-child {
+                        &::after {
+                            content: "";
+                        }
+                    } 
+                }
+                .gold-genre {
+                    &:hover {
+                        color: $goldDark;
+                    }
+                }
+                .crimson-genre {
+                    &:hover {
+                        color: $crimsonDark;
+                        text-shadow: 0 0 1px $crimsonBright;
+                    }
+                }
+            }
+            p {
+                line-height: 1.2;
+                margin-top: 0.3rem;
+                font-family: 'Quicksand', sans-serif;
+                font-size: 1.05rem;;
+                color: rgba(255, 255, 255, 0.7);
+                display: -webkit-box;
+                -webkit-line-clamp: 10;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin-bottom: 1rem;
+            }
         }
     }
 </style>
